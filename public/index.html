@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Facts AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      height: 100vh;
+      background: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .header p {
+      margin: 3px 0 0;
+      color: #777;
+      font-size: 13px;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 25px 20px;
+    }
+
+    .message {
+      max-width: 80%;
+      margin-bottom: 18px;
+      padding: 12px 15px;
+      border-radius: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      margin-left: auto;
+      background: #111;
+      color: white;
+    }
+
+    .assistant {
+      margin-right: auto;
+      background: #f0f0f0;
+      color: #111;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-top: 25vh;
+    }
+
+    .welcome h2 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #777;
+    }
+
+    .input-area {
+      border-top: 1px solid #ddd;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #messageInput {
+      flex: 1;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      outline: none;
+      min-height: 48px;
+      max-height: 150px;
+    }
+
+    #sendButton {
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      padding: 0 20px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    #sendButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 90%;
+      }
+
+      .welcome h2 {
+        font-size: 23px;
+      }
+
+      #sendButton {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <div class="header">
+      <div class="logo">F</div>
+
+      <div>
+        <h1>Facts AI</h1>
+        <p>Your personal facts & research assistant</p>
+      </div>
+    </div>
+
+    <div id="chat">
+
+      <div class="welcome" id="welcome">
+        <h2>నమస్కారం 👋</h2>
+        <p>నేను Facts AI. మన Facts Channel కోసం మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.</p>
+      </div>
+
+    </div>
+
+    <div class="input-area">
+
+      <textarea
+        id="messageInput"
+        placeholder="Facts AIని ఏదైనా అడగండి..."
+        rows="1"
+      ></textarea>
+
+      <button id="sendButton">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const welcome = document.getElementById("welcome");
+
+    function addMessage(text, type) {
+
+      if (welcome) {
+        welcome.style.display = "none";
+      }
+
+      const message = document.createElement("div");
+
+      message.className = "message " + type;
+      message.textContent = text;
+
+      chat.appendChild(message);
+
+      chat.scrollTop = chat.scrollHeight;
+
+      return message;
+    }
+
+    async function sendMessage() {
+
+      const message = input.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      addMessage(message, "user");
+
+      input.value = "";
+      sendButton.disabled = true;
+
+      const thinkingMessage =
+        addMessage("ఆలోచిస్తున్నాను...", "assistant");
+
+      try {
+
+        const response = await fetch("/api/chat", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            message: message
+          })
+
+        });
+
+        const data = await response.json();
+
+        thinkingMessage.remove();
+
+        if (!response.ok) {
+
+          addMessage(
+            data.error || "ఏదో సమస్య వచ్చింది.",
+            "assistant"
+          );
+
+        } else {
+
+          addMessage(
+            data.reply,
+            "assistant"
+          );
+
+        }
+
+      } catch (error) {
+
+        thinkingMessage.remove();
+
+        addMessage(
+          "Serverతో connection కాలేదు. Deployment configuration check చేయాలి.",
+          "assistant"
+        );
+
+      } finally {
+
+        sendButton.disabled = false;
+        input.focus();
+
+      }
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+
+    input.addEventListener("keydown", function(event) {
+
+      if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
