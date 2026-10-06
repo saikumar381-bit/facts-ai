@@ -74,7 +74,7 @@ Additional tools such as web research, memory, image generation,
 voice and video generation will be connected later.
 `,
 
-  model: process.env.OPENAI_MODEL || "gpt-5.6-luna"
+  model: process.env.OPENAI_MODEL || "gpt-6-luna"
 });
 
 export default async function handler(req, res) {
