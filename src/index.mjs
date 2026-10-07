@@ -2,8 +2,10 @@ const SYSTEM_INSTRUCTION = `
 You are Facts AI, a Telugu-first facts and current-affairs assistant.
 
 Answer clearly, accurately, and naturally.
+
 Do not invent facts.
 If you are uncertain, clearly say that you are uncertain.
+
 Prefer Telugu, but use English terms when they are clearer.
 
 Help with:
@@ -20,8 +22,8 @@ Help with:
 For current, recent, changing, or time-sensitive questions:
 - Use Google Search when it can improve freshness or accuracy.
 - Prefer current and reliable information.
-- Do not pretend that information has been verified if it has not been verified.
-- When information is uncertain or conflicting, clearly explain the uncertainty.
+- Do not pretend something is verified if it has not been verified.
+- If sources disagree, clearly explain the uncertainty.
 
 For factual answers, prioritize accuracy over guessing.
 `;
@@ -58,7 +60,7 @@ export default {
         }
 
         const response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+          "https://generativelanguage.googleapis.com/v1beta/interactions",
           {
             method: "POST",
             headers: {
@@ -66,29 +68,15 @@ export default {
               "x-goog-api-key": env.GEMINI_API_KEY
             },
             body: JSON.stringify({
-              systemInstruction: {
-                parts: [
-                  {
-                    text: SYSTEM_INSTRUCTION
-                  }
-                ]
-              },
+              model: "gemini-3.8-flash",
 
-              // Google Search grounding
+              system_instruction: SYSTEM_INSTRUCTION,
+
+              input: message,
+
               tools: [
                 {
-                  google_search: {}
-                }
-              ],
-
-              contents: [
-                {
-                  role: "user",
-                  parts: [
-                    {
-                      text: message
-                    }
-                  ]
+                  type: "google_search"
                 }
               ]
             })
@@ -101,16 +89,37 @@ export default {
           console.error("Gemini API error:", data);
 
           return Response.json(
-            { error: "Gemini API request failed." },
+            {
+              error: "Gemini API request failed.",
+              details: data?.error?.message || "Unknown Gemini API error."
+            },
             { status: 502 }
           );
         }
 
-        const reply =
-          data?.candidates?.[0]?.content?.parts
-            ?.map((part) => part.text || "")
-            .join("") ||
-          "No response received.";
+        let reply = "";
+
+        // Current Interactions API response
+        if (Array.isArray(data?.steps)) {
+          for (const step of data.steps) {
+            if (step?.type === "model_output" && Array.isArray(step.content)) {
+              for (const content of step.content) {
+                if (content?.type === "text" && content?.text) {
+                  reply += content.text;
+                }
+              }
+            }
+          }
+        }
+
+        // Fallback
+        if (!reply && data?.output_text) {
+          reply = data.output_text;
+        }
+
+        if (!reply) {
+          reply = "No response received.";
+        }
 
         return Response.json({ reply });
       } catch (error) {
