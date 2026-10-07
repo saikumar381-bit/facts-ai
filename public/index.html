@@ -29,9 +29,8 @@
     .app {
       width: 100%;
       max-width: 900px;
-      height: 100vh;
       height: 100dvh;
-      background: #fff;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -43,10 +42,11 @@
       flex: 0 0 auto;
       height: 70px;
       padding: 10px 15px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #dddddd;
       display: flex;
       align-items: center;
       gap: 10px;
+      background: #ffffff;
     }
 
     .logo {
@@ -54,8 +54,8 @@
       height: 42px;
       min-width: 42px;
       border-radius: 50%;
-      background: #111;
-      color: #fff;
+      background: #111111;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -71,25 +71,28 @@
     .header h1 {
       margin: 0;
       font-size: 20px;
+      color: #111111;
     }
 
     .header p {
       margin: 3px 0 0;
-      color: #777;
+      color: #777777;
       font-size: 12px;
     }
 
     #clearButton {
-      width: auto;
       height: 36px;
-      padding: 0 10px;
-      border: 1px solid #ddd;
+      padding: 0 12px;
+      border: 1px solid #dddddd;
       border-radius: 9px;
-      background: #fff;
-      color: #555;
+      background: #ffffff;
+      color: #555555;
       font-size: 13px;
       cursor: pointer;
-      flex: 0 0 auto;
+    }
+
+    #clearButton:active {
+      background: #eeeeee;
     }
 
     /* CHAT */
@@ -98,7 +101,9 @@
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 20px 15px;
+      scroll-behavior: smooth;
     }
 
     .message {
@@ -111,35 +116,42 @@
       line-height: 1.6;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
+      word-break: break-word;
+      font-size: 15px;
     }
 
     .user {
       margin-left: auto;
-      background: #111;
-      color: #fff;
+      margin-right: 0;
+      background: #111111;
+      color: #ffffff;
     }
 
     .assistant {
+      margin-left: 0;
       margin-right: auto;
       background: #f0f0f0;
-      color: #111;
+      color: #111111;
     }
 
     .welcome {
       text-align: center;
       padding: 20px 15px;
-      margin-top: 20vh;
+      margin-top: 18vh;
     }
 
     .welcome h2 {
-      font-size: 26px;
       margin: 0 0 10px;
+      font-size: 27px;
+      color: #111111;
     }
 
     .welcome p {
-      color: #777;
+      margin: 0 auto;
+      max-width: 500px;
+      color: #777777;
       line-height: 1.6;
-      margin: 0;
+      font-size: 15px;
     }
 
     /* INPUT */
@@ -148,41 +160,42 @@
       flex: 0 0 auto;
       width: 100%;
       padding: 10px;
-      border-top: 1px solid #ddd;
-      background: #fff;
+      border-top: 1px solid #dddddd;
+      background: #ffffff;
       display: flex;
       align-items: flex-end;
       gap: 8px;
     }
 
     #messageInput {
-      flex: 1 1 auto;
-      width: 0;
+      flex: 1;
+      width: 100%;
       min-width: 0;
       min-height: 46px;
       max-height: 130px;
       resize: none;
-      border: 1px solid #ccc;
+      border: 1px solid #cccccc;
       border-radius: 12px;
       padding: 12px;
       font-size: 16px;
       font-family: Arial, sans-serif;
       outline: none;
+      background: #ffffff;
+      color: #111111;
     }
 
     #messageInput:focus {
-      border-color: #888;
+      border-color: #888888;
     }
 
     #sendButton {
-      flex: 0 0 72px;
-      width: 72px;
+      flex: 0 0 70px;
+      width: 70px;
       height: 46px;
-      padding: 0;
-      border: 0;
+      border: none;
       border-radius: 12px;
-      background: #111;
-      color: #fff;
+      background: #111111;
+      color: #ffffff;
       font-size: 14px;
       cursor: pointer;
     }
@@ -198,13 +211,14 @@
 
       .header {
         height: 64px;
-        padding: 8px 12px;
+        padding: 8px 10px;
       }
 
       .logo {
         width: 38px;
         height: 38px;
         min-width: 38px;
+        font-size: 16px;
       }
 
       .header h1 {
@@ -238,6 +252,10 @@
         font-size: 23px;
       }
 
+      .welcome p {
+        font-size: 14px;
+      }
+
       .input-area {
         padding: 8px;
         gap: 7px;
@@ -246,6 +264,7 @@
       #messageInput {
         min-height: 44px;
         font-size: 16px;
+        padding: 11px;
       }
 
       #sendButton {
@@ -261,6 +280,8 @@
 
   <div class="app">
 
+    <!-- HEADER -->
+
     <div class="header">
 
       <div class="logo">F</div>
@@ -270,11 +291,19 @@
         <p>Your personal facts & research assistant</p>
       </div>
 
-      <button id="clearButton">Clear</button>
+      <button id="clearButton" type="button">
+        Clear
+      </button>
 
     </div>
 
+
+    <!-- CHAT -->
+
     <div id="chat"></div>
+
+
+    <!-- INPUT -->
 
     <div class="input-area">
 
@@ -282,31 +311,58 @@
         id="messageInput"
         placeholder="Facts AIని ఏదైనా అడగండి..."
         rows="1"
+        autocomplete="off"
       ></textarea>
 
-      <button id="sendButton">Send</button>
+      <button id="sendButton" type="button">
+        Send
+      </button>
 
     </div>
 
   </div>
 
+
   <script>
+
+    /* ELEMENTS */
 
     const chat = document.getElementById("chat");
     const input = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
     const clearButton = document.getElementById("clearButton");
 
-    const STORAGE_KEY = "facts_ai_chat_history";
+
+    /* LOCAL STORAGE */
+
+    const STORAGE_KEY = "facts_ai_chat_history_v2";
 
     let conversationHistory = [];
 
-    function saveHistory() {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(conversationHistory)
-      );
+
+    /* WELCOME */
+
+    function showWelcome() {
+
+      chat.innerHTML = "";
+
+      const welcome = document.createElement("div");
+
+      welcome.className = "welcome";
+
+      welcome.innerHTML = `
+        <h2>నమస్కారం 👋</h2>
+        <p>
+          నేను Facts AI. మీ Facts Channel కోసం మీకు
+          సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
+        </p>
+      `;
+
+      chat.appendChild(welcome);
     }
+
+
+    /* ADD MESSAGE TO SCREEN */
 
     function addMessageToScreen(text, role) {
 
@@ -325,73 +381,8 @@
       return message;
     }
 
-    function showWelcome() {
 
-      chat.innerHTML = "";
-
-      const welcome =
-        document.createElement("div");
-
-      welcome.className = "welcome";
-
-      welcome.innerHTML = `
-        <h2>నమస్కారం 👋</h2>
-        <p>
-          నేను Facts AI. మన Facts Channel కోసం
-          మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
-        </p>
-      `;
-
-      chat.appendChild(welcome);
-    }
-
-    function renderHistory() {
-
-      chat.innerHTML = "";
-
-      if (conversationHistory.length === 0) {
-        showWelcome();
-        return;
-      }
-
-      conversationHistory.forEach(function(item) {
-
-        addMessageToScreen(
-          item.text,
-          item.role
-        );
-
-      });
-
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function loadHistory() {
-
-      try {
-
-        const saved =
-          localStorage.getItem(STORAGE_KEY);
-
-        if (saved) {
-
-          const parsed =
-            JSON.parse(saved);
-
-          if (Array.isArray(parsed)) {
-            conversationHistory = parsed;
-          }
-
-        }
-
-      } catch (error) {
-
-        conversationHistory = [];
-
-      }
-
-      renderHistory();
-    }
+    /* ADD MESSAGE */
 
     function addMessage(text, role) {
 
@@ -405,21 +396,107 @@
       saveHistory();
     }
 
-    async function sendMessage() {
 
-      const message =
-        input.value.trim();
+    /* SAVE HISTORY */
 
-      if (!message || sendButton.disabled) {
+    function saveHistory() {
+
+      try {
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(conversationHistory)
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Could not save chat history:",
+          error
+        );
+
+      }
+    }
+
+
+    /* LOAD HISTORY */
+
+    function loadHistory() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+
+          const parsed = JSON.parse(saved);
+
+          if (Array.isArray(parsed)) {
+
+            conversationHistory = parsed;
+
+          }
+
+        }
+
+      } catch (error) {
+
+        conversationHistory = [];
+
+      }
+
+      renderHistory();
+    }
+
+
+    /* RENDER HISTORY */
+
+    function renderHistory() {
+
+      chat.innerHTML = "";
+
+      if (conversationHistory.length === 0) {
+
+        showWelcome();
+
         return;
       }
 
-      /*
-       * Previous messages మాత్రమే backendకి పంపుతాం.
-       * Current message separate-ga పంపుతాం.
-       */
-      const previousHistory =
-        conversationHistory.slice();
+      conversationHistory.forEach(function(item) {
+
+        if (
+          item &&
+          typeof item.text === "string" &&
+          typeof item.role === "string"
+        ) {
+
+          addMessageToScreen(
+            item.text,
+            item.role
+          );
+
+        }
+
+      });
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+
+    /* SEND MESSAGE */
+
+    async function sendMessage() {
+
+      const message = input.value.trim();
+
+      if (!message || sendButton.disabled) {
+
+        return;
+      }
+
+
+      /* Save user message */
 
       addMessage(
         message,
@@ -430,49 +507,85 @@
 
       sendButton.disabled = true;
 
+
+      /* Thinking */
+
       const thinking =
         addMessageToScreen(
           "ఆలోచిస్తున్నాను...",
           "assistant"
         );
 
+
       try {
 
-        const response =
-          await fetch(
-            "/api/chat",
-            {
-              method: "POST",
+        /*
+          Send current message + previous
+          conversation to Cloudflare Worker.
+        */
 
-              headers: {
-                "Content-Type": "application/json"
-              },
+        const previousHistory =
+          conversationHistory
+            .slice(0, -1)
+            .slice(-20);
 
-              body: JSON.stringify({
-                message: message,
-                history: previousHistory
-              })
-            }
-          );
 
-        const data =
-          await response.json();
+        const response = await fetch(
+          "/api/chat",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              message: message,
+
+              history: previousHistory
+
+            })
+          }
+        );
+
+
+        let data = {};
+
+        try {
+
+          data = await response.json();
+
+        } catch (jsonError) {
+
+          data = {};
+
+        }
+
 
         thinking.remove();
 
+
         if (!response.ok) {
 
-          addMessage(
+          const errorMessage =
             data.error ||
-            "ఏదో సమస్య వచ్చింది.",
+            "Gemini API request failed.";
+
+          addMessage(
+            errorMessage,
             "assistant"
           );
 
         } else {
 
+          const reply =
+            typeof data.reply === "string"
+              ? data.reply
+              : "No response received.";
+
           addMessage(
-            data.reply ||
-            "No response received.",
+            reply,
             "assistant"
           );
 
@@ -480,10 +593,15 @@
 
       } catch (error) {
 
+        console.error(
+          "Connection error:",
+          error
+        );
+
         thinking.remove();
 
         addMessage(
-          "Serverతో connection కాలేదు.",
+          "Serverతో connection కాలేదు. కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.",
           "assistant"
         );
 
@@ -494,37 +612,57 @@
         input.focus();
 
       }
+
     }
+
+
+    /* CLEAR CHAT */
 
     clearButton.addEventListener(
       "click",
       function() {
 
-        const ok =
+        const confirmed =
           confirm(
             "ఈ conversation మొత్తాన్ని clear చేయాలా?"
           );
 
-        if (!ok) {
+        if (!confirmed) {
+
           return;
         }
 
         conversationHistory = [];
 
-        localStorage.removeItem(
-          STORAGE_KEY
-        );
+        try {
+
+          localStorage.removeItem(
+            STORAGE_KEY
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+        }
 
         renderHistory();
 
         input.focus();
+
       }
     );
+
+
+    /* SEND BUTTON */
 
     sendButton.addEventListener(
       "click",
       sendMessage
     );
+
+
+    /* ENTER KEY */
 
     input.addEventListener(
       "keydown",
@@ -538,14 +676,38 @@
           event.preventDefault();
 
           sendMessage();
+
         }
 
       }
     );
 
+
+    /* AUTO RESIZE TEXTAREA */
+
+    input.addEventListener(
+      "input",
+      function() {
+
+        input.style.height = "auto";
+
+        input.style.height =
+          Math.min(
+            input.scrollHeight,
+            130
+          ) + "px";
+
+      }
+    );
+
+
+    /* START APP */
+
     loadHistory();
+
+    input.focus();
 
   </script>
 
 </body>
-</html>
+  </html>
