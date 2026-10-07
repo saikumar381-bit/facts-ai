@@ -80,9 +80,16 @@
       font-size: 12px;
     }
 
-    #clearButton {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .header-button {
       height: 36px;
-      padding: 0 12px;
+      padding: 0 11px;
       border: 1px solid #dddddd;
       border-radius: 9px;
       background: #ffffff;
@@ -91,7 +98,7 @@
       cursor: pointer;
     }
 
-    #clearButton:active {
+    .header-button:active {
       background: #eeeeee;
     }
 
@@ -228,4 +235,620 @@
     }
 
     #sendButton {
-     
+      flex: 0 0 70px;
+      width: 70px;
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      background: #111111;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #sendButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 600px) {
+
+      .header {
+        height: 64px;
+        padding: 8px 10px;
+        gap: 7px;
+      }
+
+      .logo {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 16px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .header p {
+        font-size: 11px;
+      }
+
+      .header-actions {
+        gap: 4px;
+      }
+
+      .header-button {
+        height: 34px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      #chat {
+        padding: 15px 10px;
+      }
+
+      .message {
+        max-width: 90%;
+        font-size: 15px;
+      }
+
+      .welcome {
+        margin-top: 18vh;
+      }
+
+      .welcome h2 {
+        font-size: 23px;
+      }
+
+      .welcome p {
+        font-size: 14px;
+      }
+
+      .input-area {
+        padding: 8px;
+        gap: 7px;
+      }
+
+      #messageInput {
+        min-height: 44px;
+        font-size: 16px;
+        padding: 11px;
+      }
+
+      #sendButton {
+        flex-basis: 68px;
+        width: 68px;
+        height: 44px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+      <div class="logo">F</div>
+
+      <div class="header-info">
+        <h1>Facts AI</h1>
+        <p>Your personal facts & research assistant</p>
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          id="newChatButton"
+          class="header-button"
+          type="button"
+        >
+          New Chat
+        </button>
+
+        <button
+          id="clearButton"
+          class="header-button"
+          type="button"
+        >
+          Clear
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- CHAT -->
+
+    <div id="chat"></div>
+
+
+    <!-- INPUT -->
+
+    <div class="input-area">
+
+      <textarea
+        id="messageInput"
+        placeholder="Facts AIని ఏదైనా అడగండి..."
+        rows="1"
+        autocomplete="off"
+      ></textarea>
+
+      <button id="sendButton" type="button">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* ELEMENTS */
+
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const clearButton = document.getElementById("clearButton");
+    const newChatButton =
+      document.getElementById("newChatButton");
+
+
+    /* LOCAL STORAGE */
+
+    const STORAGE_KEY = "facts_ai_chat_history_v2";
+
+    let conversationHistory = [];
+
+
+    /* WELCOME */
+
+    function showWelcome() {
+
+      chat.innerHTML = "";
+
+      const welcome = document.createElement("div");
+
+      welcome.className = "welcome";
+
+      welcome.innerHTML = `
+        <h2>నమస్కారం 👋</h2>
+        <p>
+          నేను Facts AI. మీ Facts Channel కోసం మీకు
+          సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
+        </p>
+      `;
+
+      chat.appendChild(welcome);
+    }
+
+
+    /* ADD MESSAGE TO SCREEN */
+
+    function addMessageToScreen(text, role) {
+
+      const message = document.createElement("div");
+
+      message.className =
+        "message " +
+        (role === "user" ? "user" : "assistant");
+
+      message.textContent = text;
+
+      chat.appendChild(message);
+
+      chat.scrollTop = chat.scrollHeight;
+
+      return message;
+    }
+
+
+    /* ADD MESSAGE */
+
+    function addMessage(text, role) {
+
+      addMessageToScreen(text, role);
+
+      conversationHistory.push({
+        role: role,
+        text: text
+      });
+
+      saveHistory();
+    }
+
+
+    /* SAVE HISTORY */
+
+    function saveHistory() {
+
+      try {
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(conversationHistory)
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Could not save chat history:",
+          error
+        );
+
+      }
+    }
+
+
+    /* LOAD HISTORY */
+
+    function loadHistory() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+
+          const parsed = JSON.parse(saved);
+
+          if (Array.isArray(parsed)) {
+
+            conversationHistory = parsed;
+
+          }
+
+        }
+
+      } catch (error) {
+
+        conversationHistory = [];
+
+      }
+
+      renderHistory();
+    }
+
+
+    /* RENDER HISTORY */
+
+    function renderHistory() {
+
+      chat.innerHTML = "";
+
+      if (conversationHistory.length === 0) {
+
+        showWelcome();
+
+        return;
+      }
+
+      conversationHistory.forEach(function(item) {
+
+        if (
+          item &&
+          typeof item.text === "string" &&
+          typeof item.role === "string"
+        ) {
+
+          addMessageToScreen(
+            item.text,
+            item.role
+          );
+
+        }
+
+      });
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+
+    /* NEW CHAT */
+
+    function startNewChat() {
+
+      const hasMessages =
+        conversationHistory.length > 0;
+
+      if (hasMessages) {
+
+        const confirmed =
+          confirm(
+            "ప్రస్తుత conversationని close చేసి New Chat ప్రారంభించాలా?"
+          );
+
+        if (!confirmed) {
+
+          return;
+        }
+
+      }
+
+      conversationHistory = [];
+
+      try {
+
+        localStorage.removeItem(
+          STORAGE_KEY
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+      renderHistory();
+
+      input.value = "";
+      input.style.height = "auto";
+
+      input.focus();
+    }
+
+
+    /* THINKING INDICATOR */
+
+    function showThinking() {
+
+      const thinking =
+        addMessageToScreen(
+          "",
+          "assistant"
+        );
+
+      thinking.innerHTML = `
+        <span class="thinking">
+          <span class="thinking-dot"></span>
+          <span class="thinking-dot"></span>
+          <span class="thinking-dot"></span>
+        </span>
+      `;
+
+      return thinking;
+    }
+
+
+    /* SEND MESSAGE */
+
+    async function sendMessage() {
+
+      const message = input.value.trim();
+
+      if (!message || sendButton.disabled) {
+
+        return;
+      }
+
+
+      /* Save user message */
+
+      addMessage(
+        message,
+        "user"
+      );
+
+      input.value = "";
+
+      input.style.height = "auto";
+
+      sendButton.disabled = true;
+
+
+      /* Thinking */
+
+      const thinking = showThinking();
+
+
+      try {
+
+        /*
+          Send current message + previous
+          conversation to Cloudflare Worker.
+        */
+
+        const previousHistory =
+          conversationHistory
+            .slice(0, -1)
+            .slice(-20);
+
+
+        const response = await fetch(
+          "/api/chat",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              message: message,
+
+              history: previousHistory
+
+            })
+          }
+        );
+
+
+        let data = {};
+
+        try {
+
+          data = await response.json();
+
+        } catch (jsonError) {
+
+          data = {};
+
+        }
+
+
+        thinking.remove();
+
+
+        if (!response.ok) {
+
+          const errorMessage =
+            data.error ||
+            "Gemini API request failed.";
+
+          addMessage(
+            errorMessage,
+            "assistant"
+          );
+
+        } else {
+
+          const reply =
+            typeof data.reply === "string"
+              ? data.reply
+              : "No response received.";
+
+          addMessage(
+            reply,
+            "assistant"
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Connection error:",
+          error
+        );
+
+        thinking.remove();
+
+        addMessage(
+          "Serverతో connection కాలేదు. కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.",
+          "assistant"
+        );
+
+      } finally {
+
+        sendButton.disabled = false;
+
+        input.focus();
+
+      }
+
+    }
+
+
+    /* NEW CHAT BUTTON */
+
+    newChatButton.addEventListener(
+      "click",
+      startNewChat
+    );
+
+
+    /* CLEAR CHAT */
+
+    clearButton.addEventListener(
+      "click",
+      function() {
+
+        const confirmed =
+          confirm(
+            "ఈ conversation మొత్తాన్ని clear చేయాలా?"
+          );
+
+        if (!confirmed) {
+
+          return;
+        }
+
+        conversationHistory = [];
+
+        try {
+
+          localStorage.removeItem(
+            STORAGE_KEY
+          );
+
+        } catch (error) {
+
+          console.error(error);
+
+        }
+
+        renderHistory();
+
+        input.focus();
+
+      }
+    );
+
+
+    /* SEND BUTTON */
+
+    sendButton.addEventListener(
+      "click",
+      sendMessage
+    );
+
+
+    /* ENTER KEY */
+
+    input.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
+      }
+    );
+
+
+    /* AUTO RESIZE TEXTAREA */
+
+    input.addEventListener(
+      "input",
+      function() {
+
+        input.style.height = "auto";
+
+        input.style.height =
+          Math.min(
+            input.scrollHeight,
+            130
+          ) + "px";
+
+      }
+    );
+
+
+    /* START APP */
+
+    loadHistory();
+
+    input.focus();
+
+  </script>
+
+</body>
+  </html>
