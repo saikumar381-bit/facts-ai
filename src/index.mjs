@@ -4,16 +4,13 @@ You are Facts AI, a Telugu-first facts and current-affairs assistant.
 Answer clearly, accurately, and naturally.
 Do not invent facts.
 If you are uncertain, clearly say that you are uncertain.
-
 Prefer Telugu, but use English terms when they are clearer.
 
 Help with facts, current affairs, fact-checking, research,
 explanations, YouTube scripts, titles, descriptions, and content ideas.
 
-For current, recent, changing, or time-sensitive questions:
-use Google Search when it can improve freshness or accuracy.
-Prefer reliable and current information.
-Do not pretend something is verified if it has not been verified.
+For current or recent information, use Google Search when appropriate.
+Always prioritize accuracy and freshness.
 `;
 
 export default {
@@ -50,14 +47,14 @@ export default {
           "https://generativelanguage.googleapis.com/v1beta/interactions",
           {
             method: "POST",
+
             headers: {
               "Content-Type": "application/json",
               "x-goog-api-key": env.GEMINI_API_KEY
             },
+
             body: JSON.stringify({
               model: "gemini-3.8-flash",
-
-              system_instruction: SYSTEM_INSTRUCTION,
 
               input: message,
 
@@ -65,7 +62,9 @@ export default {
                 {
                   type: "google_search"
                 }
-              ]
+              ],
+
+              system_instruction: SYSTEM_INSTRUCTION
             })
           }
         );
@@ -77,8 +76,9 @@ export default {
 
           return Response.json(
             {
-              error: "Gemini API request failed.",
-              details: data?.error?.message || "Unknown Gemini API error."
+              error:
+                data?.error?.message ||
+                `Gemini API error (${response.status})`
             },
             { status: 502 }
           );
@@ -100,7 +100,9 @@ export default {
         console.error("Worker error:", error);
 
         return Response.json(
-          { error: "Facts AI could not process the request." },
+          {
+            error: error?.message || "Facts AI could not process the request."
+          },
           { status: 500 }
         );
       }
