@@ -183,6 +183,263 @@
 
       <button id="sendButton">
         Send
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Facts AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      height: 100vh;
+      background: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .header-info {
+      flex: 1;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .header p {
+      margin: 3px 0 0;
+      color: #777;
+      font-size: 13px;
+    }
+
+    #clearButton {
+      border: 1px solid #ddd;
+      background: white;
+      color: #555;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    #clearButton:hover {
+      background: #f5f5f5;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 25px 20px;
+    }
+
+    .message {
+      max-width: 80%;
+      margin-bottom: 18px;
+      padding: 12px 15px;
+      border-radius: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .user {
+      margin-left: auto;
+      background: #111;
+      color: white;
+    }
+
+    .assistant {
+      margin-right: auto;
+      background: #f0f0f0;
+      color: #111;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-top: 25vh;
+    }
+
+    .welcome h2 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #777;
+      line-height: 1.6;
+    }
+
+    .input-area {
+      border-top: 1px solid #ddd;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #messageInput {
+      flex: 1;
+      resize: none;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      outline: none;
+      min-height: 48px;
+      max-height: 150px;
+      font-family: Arial, sans-serif;
+    }
+
+    #messageInput:focus {
+      border-color: #888;
+    }
+
+    #sendButton {
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      padding: 0 20px;
+      cursor: pointer;
+      font-size: 15px;
+      min-width: 75px;
+    }
+
+    #sendButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+
+      .header {
+        padding: 12px 14px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .header p {
+        font-size: 12px;
+      }
+
+      #clearButton {
+        padding: 7px 8px;
+        font-size: 12px;
+      }
+
+      #chat {
+        padding: 20px 14px;
+      }
+
+      .message {
+        max-width: 90%;
+      }
+
+      .welcome {
+        margin-top: 22vh;
+        padding: 0 10px;
+      }
+
+      .welcome h2 {
+        font-size: 23px;
+      }
+
+      .input-area {
+        padding: 10px;
+      }
+
+      #messageInput {
+        font-size: 16px;
+      }
+
+      #sendButton {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <div class="header">
+
+      <div class="logo">F</div>
+
+      <div class="header-info">
+        <h1>Facts AI</h1>
+        <p>Your personal facts & research assistant</p>
+      </div>
+
+      <button id="clearButton">
+        Clear
+      </button>
+
+    </div>
+
+    <div id="chat">
+
+      <div class="welcome" id="welcome">
+        <h2>నమస్కారం 👋</h2>
+
+        <p>
+          నేను Facts AI. మన Facts Channel కోసం
+          మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="input-area">
+
+      <textarea
+        id="messageInput"
+        placeholder="Facts AIని ఏదైనా అడగండి..."
+        rows="1"
+      ></textarea>
+
+      <button id="sendButton">
+        Send
       </button>
 
     </div>
@@ -194,73 +451,235 @@
     const chat = document.getElementById("chat");
     const input = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
+    const clearButton = document.getElementById("clearButton");
     const welcome = document.getElementById("welcome");
 
-    function addMessage(text, type) {
+    const STORAGE_KEY = "facts_ai_chat_history";
 
-      if (welcome) {
-        welcome.style.display = "none";
+    let conversationHistory = [];
+
+    // Load saved conversation
+    function loadHistory() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+
+          const parsed = JSON.parse(saved);
+
+          if (Array.isArray(parsed)) {
+            conversationHistory = parsed;
+          }
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Could not load chat history:",
+          error
+        );
+
+        conversationHistory = [];
+
       }
 
-      const message = document.createElement("div");
+      renderHistory();
+    }
 
-      message.className = "message " + type;
+
+    // Save conversation
+    function saveHistory() {
+
+      try {
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(conversationHistory)
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Could not save chat history:",
+          error
+        );
+
+      }
+    }
+
+
+    // Render saved messages
+    function renderHistory() {
+
+      chat.innerHTML = "";
+
+      if (conversationHistory.length === 0) {
+
+        const welcomeDiv =
+          document.createElement("div");
+
+        welcomeDiv.className = "welcome";
+        welcomeDiv.id = "welcome";
+
+        welcomeDiv.innerHTML = `
+          <h2>నమస్కారం 👋</h2>
+          <p>
+            నేను Facts AI. మన Facts Channel కోసం
+            మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
+          </p>
+        `;
+
+        chat.appendChild(welcomeDiv);
+
+        return;
+      }
+
+      for (const item of conversationHistory) {
+
+        addMessageToScreen(
+          item.text,
+          item.role
+        );
+
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+
+    // Add one message to screen
+    function addMessageToScreen(text, role) {
+
+      const message =
+        document.createElement("div");
+
+      message.className =
+        "message " +
+        (role === "user"
+          ? "user"
+          : "assistant");
+
+      message.textContent = text;
+
+      chat.appendChild(message);
+
+      return message;
+    }
+
+
+    // Add message to history and screen
+    function addMessage(text, role) {
+
+      const message =
+        document.createElement("div");
+
+      message.className =
+        "message " +
+        (role === "user"
+          ? "user"
+          : "assistant");
+
       message.textContent = text;
 
       chat.appendChild(message);
 
       chat.scrollTop = chat.scrollHeight;
 
+      conversationHistory.push({
+        role: role,
+        text: text
+      });
+
+      saveHistory();
+
       return message;
     }
 
+
+    // Send message
     async function sendMessage() {
 
-      const message = input.value.trim();
+      const message =
+        input.value.trim();
 
       if (!message) {
         return;
       }
 
-      addMessage(message, "user");
+      // Save a copy of previous history
+      const previousHistory =
+        [...conversationHistory];
+
+      // Show user message
+      addMessage(
+        message,
+        "user"
+      );
 
       input.value = "";
+
       sendButton.disabled = true;
 
       const thinkingMessage =
-        addMessage("ఆలోచిస్తున్నాను...", "assistant");
+        addMessage(
+          "ఆలోచిస్తున్నాను...",
+          "assistant"
+        );
 
       try {
 
-        const response = await fetch("/api/chat", {
+        const response =
+          await fetch(
+            "/api/chat",
+            {
+              method: "POST",
 
-          method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+              body: JSON.stringify({
 
-          body: JSON.stringify({
-            message: message
-          })
+                message: message,
 
-        });
+                history: previousHistory
 
-        const data = await response.json();
+              })
+            }
+          );
+
+        const data =
+          await response.json();
 
         thinkingMessage.remove();
+
+        // Remove temporary thinking message
+        conversationHistory =
+          conversationHistory.filter(
+            item =>
+              !(
+                item.role === "assistant" &&
+                item.text === "ఆలోచిస్తున్నాను..."
+              )
+          );
 
         if (!response.ok) {
 
           addMessage(
-            data.error || "ఏదో సమస్య వచ్చింది.",
+            data.error ||
+            "ఏదో సమస్య వచ్చింది.",
             "assistant"
           );
 
         } else {
 
           addMessage(
-            data.reply,
+            data.reply ||
+            "No response received.",
             "assistant"
           );
 
@@ -270,6 +689,15 @@
 
         thinkingMessage.remove();
 
+        conversationHistory =
+          conversationHistory.filter(
+            item =>
+              !(
+                item.role === "assistant" &&
+                item.text === "ఆలోచిస్తున్నాను..."
+              )
+          );
+
         addMessage(
           "Serverతో connection కాలేదు. Deployment configuration check చేయాలి.",
           "assistant"
@@ -278,26 +706,73 @@
       } finally {
 
         sendButton.disabled = false;
+
         input.focus();
 
       }
     }
 
-    sendButton.addEventListener("click", sendMessage);
 
-    input.addEventListener("keydown", function(event) {
+    // Clear chat
+    clearButton.addEventListener(
+      "click",
+      function() {
 
-      if (event.key === "Enter" && !event.shiftKey) {
+        const confirmed =
+          confirm(
+            "ఈ conversation మొత్తాన్ని clear చేయాలా?"
+          );
 
-        event.preventDefault();
+        if (!confirmed) {
+          return;
+        }
 
-        sendMessage();
+        conversationHistory = [];
+
+        localStorage.removeItem(
+          STORAGE_KEY
+        );
+
+        renderHistory();
+
+        input.focus();
 
       }
+    );
 
-    });
+
+    // Send button
+    sendButton.addEventListener(
+      "click",
+      sendMessage
+    );
+
+
+    // Enter = send
+    // Shift + Enter = new line
+    input.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          sendMessage();
+
+        }
+
+      }
+    );
+
+
+    // Load saved chat when page opens
+    loadHistory();
 
   </script>
 
 </body>
-</html>
+  </html>
