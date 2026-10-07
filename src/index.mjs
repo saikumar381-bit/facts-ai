@@ -2,37 +2,24 @@ const SYSTEM_INSTRUCTION = `
 You are Facts AI, a Telugu-first facts and current-affairs assistant.
 
 Answer clearly, accurately, and naturally.
-
 Do not invent facts.
 If you are uncertain, clearly say that you are uncertain.
 
 Prefer Telugu, but use English terms when they are clearer.
 
-Help with:
-- facts
-- current affairs
-- fact-checking
-- research
-- explanations
-- YouTube scripts
-- titles
-- descriptions
-- content ideas
+Help with facts, current affairs, fact-checking, research,
+explanations, YouTube scripts, titles, descriptions, and content ideas.
 
 For current, recent, changing, or time-sensitive questions:
-- Use Google Search when it can improve freshness or accuracy.
-- Prefer current and reliable information.
-- Do not pretend something is verified if it has not been verified.
-- If sources disagree, clearly explain the uncertainty.
-
-For factual answers, prioritize accuracy over guessing.
+use Google Search when it can improve freshness or accuracy.
+Prefer reliable and current information.
+Do not pretend something is verified if it has not been verified.
 `;
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // API
     if (url.pathname === "/api/chat") {
       if (request.method !== "POST") {
         return Response.json(
@@ -97,31 +84,18 @@ export default {
           );
         }
 
-        let reply = "";
-
-        // Current Interactions API response
-        if (Array.isArray(data?.steps)) {
-          for (const step of data.steps) {
-            if (step?.type === "model_output" && Array.isArray(step.content)) {
-              for (const content of step.content) {
-                if (content?.type === "text" && content?.text) {
-                  reply += content.text;
-                }
-              }
-            }
-          }
-        }
-
-        // Fallback
-        if (!reply && data?.output_text) {
-          reply = data.output_text;
-        }
-
-        if (!reply) {
-          reply = "No response received.";
-        }
+        const reply =
+          data?.output_text ||
+          data?.steps
+            ?.filter((step) => step?.type === "model_output")
+            ?.flatMap((step) => step?.content || [])
+            ?.filter((content) => content?.type === "text")
+            ?.map((content) => content.text)
+            ?.join("") ||
+          "No response received.";
 
         return Response.json({ reply });
+
       } catch (error) {
         console.error("Worker error:", error);
 
@@ -132,7 +106,6 @@ export default {
       }
     }
 
-    // Website files
     return env.ASSETS.fetch(request);
   }
 };
