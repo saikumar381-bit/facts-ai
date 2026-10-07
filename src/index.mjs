@@ -5,11 +5,25 @@ Answer clearly, accurately, and naturally.
 Do not invent facts.
 If you are uncertain, clearly say that you are uncertain.
 Prefer Telugu, but use English terms when they are clearer.
-Help with facts, current affairs, fact-checking, research, explanations,
-YouTube scripts, titles, and content ideas.
 
-For current or time-sensitive claims, be careful about freshness and
-do not pretend to have verified something you have not verified.
+Help with:
+- facts
+- current affairs
+- fact-checking
+- research
+- explanations
+- YouTube scripts
+- titles
+- descriptions
+- content ideas
+
+For current, recent, changing, or time-sensitive questions:
+- Use Google Search when it can improve freshness or accuracy.
+- Prefer current and reliable information.
+- Do not pretend that information has been verified if it has not been verified.
+- When information is uncertain or conflicting, clearly explain the uncertainty.
+
+For factual answers, prioritize accuracy over guessing.
 `;
 
 export default {
@@ -59,6 +73,14 @@ export default {
                   }
                 ]
               },
+
+              // Google Search grounding
+              tools: [
+                {
+                  google_search: {}
+                }
+              ],
+
               contents: [
                 {
                   role: "user",
@@ -105,4 +127,3 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
-// Cloudflare deployment trigger
