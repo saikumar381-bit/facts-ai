@@ -57,7 +57,12 @@ SAFETY AND ACCURACY:
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
+if (url.pathname === "/api/health") {
+  return Response.json({
+    status: "ok",
+    service: "Facts AI"
+  });
+}
     if (url.pathname === "/api/chat") {
       if (request.method !== "POST") {
         return Response.json(
