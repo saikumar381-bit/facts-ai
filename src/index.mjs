@@ -50,6 +50,11 @@ CONVERSATION:
 - Avoid unnecessary repetition.
 
 SAFETY AND ACCURACY:
+- Never guess numerical facts or measurements.
+- Check that comparisons and calculations are internally consistent.
+- When the user requests a specific number of facts, provide exactly that many complete points.
+- Finish every sentence and list item before ending the response.
+- If uncertain, clearly state the uncertainty instead of guessing.
 - Never knowingly provide false information.
 - Clearly state when information is incomplete or uncertain.
 - Accuracy is more important than sounding confident.
@@ -123,14 +128,18 @@ export default {
           content: message.trim()
         });
 
-        // Cloudflare Workers AI
+        // Check Cloudflare Workers AI binding
         if (!env.AI) {
           return Response.json(
-            { error: "Cloudflare AI binding 'AI' is not configured." },
+            {
+              error:
+                "Cloudflare AI binding 'AI' is not configured."
+            },
             { status: 500 }
           );
         }
 
+        // Generate AI response
         const result = await env.AI.run(
           "@cf/meta/llama-3.1-8b-instruct-fast",
           {
