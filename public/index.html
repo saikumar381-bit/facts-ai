@@ -963,7 +963,32 @@
     loadHistory();
 
     input.focus();
+const apiStatus = document.getElementById("apiStatus");
 
+async function checkApiStatus() {
+  try {
+    const response = await fetch("/api/health");
+
+    if (!response.ok) {
+      throw new Error("API unavailable");
+    }
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      apiStatus.textContent = "● Online";
+      apiStatus.style.color = "#16803c";
+    } else {
+      throw new Error("API not ready");
+    }
+  } catch (error) {
+    apiStatus.textContent = "● Offline";
+    apiStatus.style.color = "#c62828";
+  }
+}
+
+checkApiStatus();
+setInterval(checkApiStatus, 30000);
   </script>
 
 </body>
