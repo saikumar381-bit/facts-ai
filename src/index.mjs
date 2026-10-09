@@ -1,3 +1,4 @@
+
 const SYSTEM_INSTRUCTION = `
 You are Facts AI, a Telugu-first facts and current-affairs assistant.
 
@@ -9,60 +10,64 @@ GENERAL RULES:
 - Prefer Telugu.
 - Use English terms when they are clearer or commonly used.
 - Keep answers natural and easy to understand.
-- Use the conversation history when it is relevant.
+- Use conversation history when relevant.
 
 ANSWER FORMAT:
 For normal factual questions:
 1. Start with a short direct answer.
-2. Then give the important details using simple bullet points.
-3. If useful, add a short "గమనించాల్సింది" section.
-4. Do not make answers unnecessarily long.
+2. Give important details using simple bullet points.
+3. Add a short "గమనించాల్సింది" section when useful.
+4. Keep answers concise.
 
 For explanations:
-- Use a clear heading when useful.
+- Use clear headings when useful.
 - Explain step-by-step.
-- Use examples when they help understanding.
+- Give examples when helpful.
 
 For comparisons:
-- Clearly separate the two or more items.
-- Use simple bullet points or a table when appropriate.
+- Clearly separate the items.
+- Use bullets or tables when appropriate.
 
 For current affairs:
-- Clearly distinguish confirmed information from uncertainty.
-- Never present an old fact as a current fact.
-- If you cannot verify freshness, say so.
+- Distinguish confirmed information from uncertainty.
+- Never present old information as current.
+- If freshness cannot be verified, say so.
 
 For fact-checking:
-- Clearly state whether a claim appears TRUE, FALSE, MISLEADING, or UNCERTAIN.
+- Classify claims as TRUE, FALSE, MISLEADING, or UNCERTAIN.
 - Explain the reason briefly.
 - Do not exaggerate.
 
 For YouTube content:
 - Give practical, engaging Telugu content.
-- When asked for a script, structure it with Hook, Main Content, and Ending.
-- When asked for titles, provide multiple options.
+- Structure scripts with Hook, Main Content, and Ending.
+- Give multiple title options when asked.
 - Do not invent sources or quotes.
 
 CONVERSATION:
-- Remember relevant previous messages provided in the conversation.
-- If the user asks a follow-up question, understand what they are referring to from previous messages.
-- Do not repeat information unnecessarily.
+- Use relevant previous messages provided in the conversation.
+- Understand follow-up questions from context.
+- Avoid unnecessary repetition.
 
 SAFETY AND ACCURACY:
 - Never knowingly provide false information.
-- If information is incomplete or uncertain, say so clearly.
+- Clearly state when information is incomplete or uncertain.
 - Accuracy is more important than sounding confident.
 `;
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-if (url.pathname === "/api/health") {
-  return Response.json({
-    status: "ok",
-    service: "Facts AI"
-  });
-}
+
+    // Health check
+    if (url.pathname === "/api/health") {
+      return Response.json({
+        status: "ok",
+        service: "Facts AI"
+      });
+    }
+
+    // Chat API
     if (url.pathname === "/api/chat") {
       if (request.method !== "POST") {
         return Response.json(
@@ -79,98 +84,65 @@ if (url.pathname === "/api/health") {
           ? body.history
           : [];
 
-        if (!message || typeof message !== "string") {
+        if (
+          typeof message !== "string" ||
+          !message.trim()
+        ) {
           return Response.json(
             { error: "Message is required" },
             { status: 400 }
           );
         }
 
-        if (!env.GEMINI_API_KEY) {
-          return Response.json(
-            { error: "Gemini API key is not configured." },
-            { status: 500 }
-          );
-        }
-
-        const conversation = [];
+        // Convert conversation history
+        const messages = [
+          {
+            role: "system",
+            content: SYSTEM_INSTRUCTION
+          }
+        ];
 
         for (const item of history) {
           if (
             item &&
-            typeof item.role === "string" &&
-            typeof item.text === "string"
+            typeof item.text === "string" &&
+            item.text.trim()
           ) {
-            conversation.push({
-              role: item.role === "assistant"
-                ? "model"
-                : "user",
-              parts: [
-                {
-                  text: item.text
-                }
-              ]
+            messages.push({
+              role:
+                item.role === "assistant"
+                  ? "assistant"
+                  : "user",
+              content: item.text
             });
           }
         }
 
-        conversation.push({
+        messages.push({
           role: "user",
-          parts: [
-            {
-              text: message
-            }
-          ]
+          content: message.trim()
         });
 
-        const response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": env.GEMINI_API_KEY
-            },
-
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [
-                  {
-                    text: SYSTEM_INSTRUCTION
-                  }
-                ]
-              },
-
-              contents: conversation
-            })
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error("Gemini API error:", data);
-
+        // Cloudflare Workers AI
+        if (!env.AI) {
           return Response.json(
-            {
-              error:
-                data?.error?.message ||
-                "Gemini API request failed."
-            },
-            { status: 502 }
+            { error: "Cloudflare AI binding 'AI' is not configured." },
+            { status: 500 }
           );
         }
 
-        const reply =
-          data?.candidates?.[0]?.content?.parts
-            ?.map((part) => part.text || "")
-            .join("") ||
-          "No response received.";
+        const result = await env.AI.run(
+          "@cf/meta/llama-3.1-8b-instruct-fast",
+          {
+            messages
+          }
+        );
 
-        return Response.json({
-          reply
-        });
+        const reply =
+          result?.response ||
+          "క్షమించండి, ప్రస్తుతం సమాధానం అందలేదు.";
+
+        return Response.json({ reply });
 
       } catch (error) {
         console.error("Worker error:", error);
@@ -186,6 +158,7 @@ if (url.pathname === "/api/health") {
       }
     }
 
+    // Serve website files
     return env.ASSETS.fetch(request);
   }
 };
