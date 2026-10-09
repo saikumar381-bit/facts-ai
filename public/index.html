@@ -831,12 +831,7 @@
         showThinking();
 
 
-      /*
-        UI-only mode.
-
-        The real AI/API response is intentionally
-        not connected here.
-      */
+      // Send the message to the Facts AI API.
 
      
 try {
@@ -878,9 +873,9 @@ try {
   input.focus();
 }
 
+}
 
-
-    function resizeInput() {
+function resizeInput() {
 
       input.style.height =
         "auto";
