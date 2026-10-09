@@ -793,7 +793,7 @@
     }
 
 
-    function sendMessage() {
+    async function sendMessage() {
 
       if (isSending) {
         return;
@@ -838,27 +838,46 @@
         not connected here.
       */
 
-      setTimeout(
-        function() {
+     
+try {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+   body: JSON.stringify({
+  message: message,
+  history: []
+})
+  });
 
-          thinking.remove();
+  const data = await response.json();
 
-          addMessage(
-            "మీ message receive అయింది. AI response కోసం API connection అవసరం.",
-            "assistant"
-          );
+  thinking.remove();
 
-          isSending = false;
+  if (!response.ok) {
+    throw new Error(
+      data.error || "AI response పొందలేకపోయాం."
+    );
+  }
 
-          sendButton.disabled =
-            false;
+  addMessage(data.reply, "assistant");
 
-          input.focus();
+} catch (error) {
+  thinking.remove();
 
-        },
-        700
-      );
-    }
+  addMessage(
+    "క్షమించండి, AI response పొందడంలో సమస్య వచ్చింది: " +
+      error.message,
+    "assistant"
+  );
+
+} finally {
+  isSending = false;
+  sendButton.disabled = false;
+  input.focus();
+}
+
 
 
     function resizeInput() {
