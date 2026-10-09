@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="te">
 <head>
@@ -6,12 +7,9 @@
   <title>Facts AI</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -25,62 +23,57 @@
       justify-content: center;
     }
 
-    button,
-    textarea {
-      font-family: Arial, sans-serif;
-    }
+    button, textarea { font-family: Arial, sans-serif; }
 
     .app {
       width: 100%;
       max-width: 900px;
       height: 100dvh;
-      background: #ffffff;
+      background: #fff;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* HEADER */
-
     .header {
       flex: 0 0 auto;
-      height: 70px;
+      min-height: 70px;
       padding: 10px 15px;
-      border-bottom: 1px solid #dddddd;
+      border-bottom: 1px solid #ddd;
       display: flex;
       align-items: center;
       gap: 10px;
-      background: #ffffff;
+      background: #fff;
+    }
+
+    .logo, .welcome-icon {
+      border-radius: 50%;
+      background: #111;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
     }
 
     .logo {
       width: 42px;
       height: 42px;
       min-width: 42px;
-      border-radius: 50%;
-      background: #111111;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
       font-size: 18px;
     }
 
-    .header-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .header-info { flex: 1; min-width: 0; }
 
     .header h1 {
       margin: 0;
       font-size: 20px;
-      color: #111111;
+      color: #111;
     }
 
     .header p {
       margin: 3px 0 0;
-      color: #777777;
+      color: #777;
       font-size: 12px;
     }
 
@@ -90,21 +83,21 @@
     }
 
     .header-button {
-      height: 36px;
+      min-height: 36px;
       padding: 0 11px;
-      border: 1px solid #dddddd;
+      border: 1px solid #ddd;
       border-radius: 9px;
-      background: #ffffff;
-      color: #555555;
+      background: #fff;
+      color: #555;
       font-size: 13px;
       cursor: pointer;
     }
 
-    .header-button:active {
-      background: #eeeeee;
+    #apiStatus {
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
     }
-
-    /* CHAT */
 
     #chat {
       flex: 1 1 auto;
@@ -120,22 +113,15 @@
       margin-bottom: 14px;
     }
 
-    .user-row {
-      justify-content: flex-end;
-    }
+    .user-row { justify-content: flex-end; }
+    .assistant-row { justify-content: flex-start; }
 
-    .assistant-row {
-      justify-content: flex-start;
-    }
-
-    .message-container {
-      max-width: 85%;
-    }
+    .message-container { max-width: 90%; min-width: 0; }
 
     .message {
       padding: 11px 14px;
       border-radius: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       word-break: break-word;
@@ -143,59 +129,50 @@
     }
 
     .user-message {
-      background: #111111;
-      color: #ffffff;
+      background: #111;
+      color: #fff;
       border-bottom-right-radius: 5px;
     }
 
     .assistant-message {
       background: #f0f0f0;
-      color: #111111;
+      color: #111;
       border-bottom-left-radius: 5px;
     }
 
     .copy-button {
       border: none;
       background: transparent;
-      color: #777777;
-      font-size: 11px;
-      padding: 4px 0;
+      color: #777;
+      font-size: 12px;
+      padding: 5px 0;
       cursor: pointer;
     }
-
-    /* WELCOME */
 
     .welcome {
       text-align: center;
       padding: 20px 15px;
-      margin-top: 14vh;
+      margin-top: 10vh;
     }
 
     .welcome-icon {
       width: 60px;
       height: 60px;
       margin: 0 auto 15px;
-      border-radius: 50%;
-      background: #111111;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       font-size: 25px;
-      font-weight: bold;
     }
 
     .welcome h2 {
       margin: 0 0 10px;
       font-size: 27px;
-      color: #111111;
+      color: #111;
     }
 
     .welcome p {
       margin: 0 auto 20px;
       max-width: 520px;
-      color: #777777;
-      line-height: 1.6;
+      color: #777;
+      line-height: 1.7;
       font-size: 15px;
     }
 
@@ -207,16 +184,14 @@
     }
 
     .suggestion {
-      border: 1px solid #dddddd;
-      background: #ffffff;
-      color: #444444;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #444;
       border-radius: 20px;
       padding: 9px 13px;
       cursor: pointer;
       font-size: 13px;
     }
-
-    /* THINKING */
 
     .thinking {
       display: inline-flex;
@@ -228,38 +203,30 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #777777;
+      background: #777;
       animation: pulse 1.2s infinite;
     }
 
-    .dot:nth-child(2) {
-      animation-delay: .15s;
-    }
-
-    .dot:nth-child(3) {
-      animation-delay: .3s;
-    }
+    .dot:nth-child(2) { animation-delay: .15s; }
+    .dot:nth-child(3) { animation-delay: .3s; }
 
     @keyframes pulse {
       0%, 60%, 100% {
         opacity: .35;
         transform: translateY(0);
       }
-
       30% {
         opacity: 1;
         transform: translateY(-4px);
       }
     }
 
-    /* INPUT */
-
     .input-area {
       flex: 0 0 auto;
       width: 100%;
       padding: 10px;
-      border-top: 1px solid #dddddd;
-      background: #ffffff;
+      border-top: 1px solid #ddd;
+      background: #fff;
     }
 
     .input-box {
@@ -273,21 +240,19 @@
       width: 100%;
       min-width: 0;
       min-height: 46px;
-      max-height: 130px;
+      max-height: 160px;
       resize: none;
-      border: 1px solid #cccccc;
+      border: 1px solid #ccc;
       border-radius: 12px;
       padding: 12px;
       font-size: 16px;
       outline: none;
-      background: #ffffff;
-      color: #111111;
-      line-height: 1.4;
+      background: #fff;
+      color: #111;
+      line-height: 1.5;
     }
 
-    #messageInput:focus {
-      border-color: #888888;
-    }
+    #messageInput:focus { border-color: #888; }
 
     #sendButton {
       flex: 0 0 70px;
@@ -295,8 +260,8 @@
       height: 46px;
       border: none;
       border-radius: 12px;
-      background: #111111;
-      color: #ffffff;
+      background: #111;
+      color: #fff;
       font-size: 14px;
       cursor: pointer;
     }
@@ -308,702 +273,434 @@
 
     .hint {
       text-align: center;
-      color: #999999;
+      color: #999;
       font-size: 10px;
       margin-top: 6px;
     }
 
-    /* MOBILE */
-
     @media (max-width: 600px) {
-
       .header {
-        height: 64px;
+        min-height: 64px;
         padding: 8px 10px;
+        gap: 7px;
       }
 
       .logo {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        font-size: 16px;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
       }
 
-      .header h1 {
-        font-size: 18px;
-      }
-
-      .header p {
-        font-size: 10px;
-      }
+      .header h1 { font-size: 17px; }
+      .header p { font-size: 10px; }
+      #apiStatus { font-size: 10px; }
 
       .header-button {
-        height: 34px;
-        padding: 0 8px;
+        min-height: 32px;
+        padding: 0 7px;
         font-size: 11px;
       }
 
-      #chat {
-        padding: 15px 10px;
-      }
+      #chat { padding: 15px 10px; }
+      .message-container { max-width: 95%; }
+      .message { font-size: 15px; }
 
-      .message-container {
-        max-width: 91%;
-      }
-
-      .message {
-        font-size: 15px;
-      }
-
-      .welcome {
-        margin-top: 8vh;
-      }
-
-      .welcome h2 {
-        font-size: 23px;
-      }
-
-      .welcome p {
-        font-size: 14px;
-      }
-
-      .suggestion {
-        font-size: 12px;
-      }
-
-      .input-area {
-        padding: 8px;
-      }
-
-      #messageInput {
-        min-height: 44px;
-      }
-
-      #sendButton {
-        width: 68px;
-        flex-basis: 68px;
-        height: 44px;
-      }
-
-      .hint {
-        display: none;
-      }
+      .welcome { margin-top: 7vh; }
+      .welcome h2 { font-size: 23px; }
+      .welcome p { font-size: 14px; }
+      .suggestion { font-size: 12px; }
+      .input-area { padding: 8px; }
+      #sendButton { width: 64px; flex-basis: 64px; }
+      .hint { display: none; }
     }
   </style>
 </head>
 
 <body>
-
   <div class="app">
-
     <div class="header">
-
       <div class="logo">F</div>
 
       <div class="header-info">
         <h1>Facts AI</h1>
-        <p>Your personal facts & research assistant</p>
+        <p>Facts, Research & Content Assistant</p>
       </div>
-<span id="apiStatus" style="font-size:13px;color:#666;">● Checking...</span>
-      <div class="header-actions">
 
-        <button
-          id="newChatButton"
-          class="header-button"
-          type="button">
+      <span id="apiStatus">● Checking...</span>
+
+      <div class="header-actions">
+        <button id="newChatButton" class="header-button" type="button">
           New Chat
         </button>
-
-        <button
-          id="clearButton"
-          class="header-button"
-          type="button">
+        <button id="clearButton" class="header-button" type="button">
           Clear
         </button>
-
       </div>
-
     </div>
 
-
-    <div id="chat"></div>
-
+    <div id="chat" aria-live="polite"></div>
 
     <div class="input-area">
-
       <div class="input-box">
-
         <textarea
           id="messageInput"
           placeholder="Facts AIని ఏదైనా అడగండి..."
           rows="1"
-          autocomplete="off"></textarea>
+          autocomplete="off"
+          aria-label="మీ ప్రశ్న"></textarea>
 
-        <button
-          id="sendButton"
-          type="button">
-          Send
-        </button>
-
+        <button id="sendButton" type="button">Send</button>
       </div>
 
-      <div class="hint">
-        Enter to send • Shift + Enter for new line
-      </div>
-
+      <div class="hint">Enter to send · Shift + Enter for new line</div>
     </div>
-
   </div>
 
-
   <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const clearButton = document.getElementById("clearButton");
+    const newChatButton = document.getElementById("newChatButton");
+    const apiStatus = document.getElementById("apiStatus");
 
-    const chat =
-      document.getElementById("chat");
-
-    const input =
-      document.getElementById("messageInput");
-
-    const sendButton =
-      document.getElementById("sendButton");
-
-    const clearButton =
-      document.getElementById("clearButton");
-
-    const newChatButton =
-      document.getElementById("newChatButton");
-
-
-    const STORAGE_KEY =
-      "facts_ai_ui_history_v1";
+    const STORAGE_KEY = "facts_ai_ui_history_v1";
 
     let conversationHistory = [];
-
     let isSending = false;
 
-
     function saveHistory() {
-
       try {
-
+        // Keep browser storage within a reasonable size.
+        conversationHistory = conversationHistory.slice(-40);
         localStorage.setItem(
           STORAGE_KEY,
           JSON.stringify(conversationHistory)
         );
-
       } catch (error) {
-
-        console.error(error);
-
+        console.error("Could not save chat history:", error);
       }
     }
 
-
-    function showWelcome() {
-
-      chat.innerHTML = "";
-
-      const welcome =
-        document.createElement("div");
-
-      welcome.className = "welcome";
-
-      welcome.innerHTML = `
-        <div class="welcome-icon">F</div>
-
-        <h2>నమస్కారం 👋</h2>
-
-        <p>
-          నేను Facts AI. Facts, research,
-          explanations మరియు content ideas
-          కోసం మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.
-        </p>
-
-        <div class="suggestions">
-
-          <button
-            class="suggestion"
-            data-question="భారతదేశం గురించి 5 ఆసక్తికరమైన facts చెప్పండి.">
-            🇮🇳 India Facts
-          </button>
-
-          <button
-            class="suggestion"
-            data-question="ఒక ఆసక్తికరమైన science fact చెప్పండి.">
-            🔬 Science Fact
-          </button>
-
-          <button
-            class="suggestion"
-            data-question="YouTube Shorts కోసం ఒక interesting facts idea ఇవ్వండి.">
-            🎬 YouTube Idea
-          </button>
-
-          <button
-            class="suggestion"
-            data-question="ఒక topicని simple Teluguలో explain చేయండి.">
-            💡 Explain
-          </button>
-
-        </div>
-      `;
-
-      chat.appendChild(welcome);
-
-      welcome
-        .querySelectorAll(".suggestion")
-        .forEach(function(button) {
-
-          button.addEventListener(
-            "click",
-            function() {
-
-              input.value =
-                button.dataset.question;
-
-              resizeInput();
-
-              input.focus();
-
-            }
-          );
-
-        });
+    function resizeInput() {
+      input.style.height = "auto";
+      input.style.height =
+        Math.min(input.scrollHeight, 160) + "px";
     }
 
+    function scrollToBottom() {
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-    function addMessageToScreen(
-      text,
-      role
-    ) {
+    function showWelcome() {
+      chat.innerHTML = "";
 
-      const row =
-        document.createElement("div");
+      const welcome = document.createElement("div");
+      welcome.className = "welcome";
 
+      const icon = document.createElement("div");
+      icon.className = "welcome-icon";
+      icon.textContent = "F";
+
+      const title = document.createElement("h2");
+      title.textContent = "నమస్కారం 👋";
+
+      const description = document.createElement("p");
+      description.textContent =
+        "నేను Facts AI. Facts, research, explanations, " +
+        "మరియు video content ideasలో మీకు సహాయం చేస్తాను.";
+
+      const suggestions = document.createElement("div");
+      suggestions.className = "suggestions";
+
+      const questions = [
+        ["🇮🇳 India Facts", "భారతదేశం గురించి 5 ఆసక్తికరమైన facts చెప్పండి."],
+        ["🔬 Science Fact", "ఒక ఆసక్తికరమైన science fact వివరించండి."],
+        ["🎬 YouTube Idea", "YouTube Shorts కోసం ఒక interesting facts idea ఇవ్వండి."],
+        ["💡 Explain", "ఒక topicని simple Teluguలో explain చేయండి."]
+      ];
+
+      for (const [label, question] of questions) {
+        const button = document.createElement("button");
+        button.className = "suggestion";
+        button.type = "button";
+        button.textContent = label;
+
+        button.addEventListener("click", () => {
+          input.value = question;
+          resizeInput();
+          input.focus();
+        });
+
+        suggestions.appendChild(button);
+      }
+
+      welcome.append(icon, title, description, suggestions);
+      chat.appendChild(welcome);
+    }
+
+    function addMessageToScreen(text, role) {
+      const row = document.createElement("div");
       row.className =
         "message-row " +
-        (
-          role === "user"
-            ? "user-row"
-            : "assistant-row"
-        );
+        (role === "user" ? "user-row" : "assistant-row");
 
-      const container =
-        document.createElement("div");
+      const container = document.createElement("div");
+      container.className = "message-container";
 
-      container.className =
-        "message-container";
-
-      const message =
-        document.createElement("div");
-
+      const message = document.createElement("div");
       message.className =
         "message " +
-        (
-          role === "user"
-            ? "user-message"
-            : "assistant-message"
-        );
+        (role === "user" ? "user-message" : "assistant-message");
 
+      // Use textContent to display text safely.
       message.textContent = text;
-
       container.appendChild(message);
 
-
-      if (
-        role === "assistant" &&
-        text
-      ) {
-
-        const copy =
-          document.createElement("button");
-
+      if (role === "assistant" && text) {
+        const copy = document.createElement("button");
         copy.type = "button";
+        copy.className = "copy-button";
+        copy.textContent = "Copy";
 
-        copy.className =
-          "copy-button";
-
-        copy.textContent =
-          "Copy";
-
-        copy.addEventListener(
-          "click",
-          async function() {
-
-            try {
-
-              await navigator.clipboard
-                .writeText(text);
-
-              copy.textContent =
-                "Copied ✓";
-
-              setTimeout(
-                function() {
-                  copy.textContent =
-                    "Copy";
-                },
-                1200
-              );
-
-            } catch (error) {
-
-              copy.textContent =
-                "Copy failed";
-
-            }
-
+        copy.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            copy.textContent = "Copied ✓";
+            setTimeout(() => {
+              copy.textContent = "Copy";
+            }, 1200);
+          } catch (error) {
+            copy.textContent = "Copy failed";
           }
-        );
+        });
 
         container.appendChild(copy);
       }
 
-
       row.appendChild(container);
-
       chat.appendChild(row);
-
-      chat.scrollTop =
-        chat.scrollHeight;
+      scrollToBottom();
 
       return row;
     }
 
-
-    function addMessage(
-      text,
-      role
-    ) {
-
-      addMessageToScreen(
-        text,
-        role
-      );
+    function addMessage(text, role) {
+      addMessageToScreen(text, role);
 
       conversationHistory.push({
-        role: role,
-        text: text
+        role,
+        text
       });
 
       saveHistory();
     }
 
-
     function renderHistory() {
-
       chat.innerHTML = "";
 
-      if (
-        conversationHistory.length === 0
-      ) {
-
+      if (conversationHistory.length === 0) {
         showWelcome();
-
         return;
       }
 
-      conversationHistory.forEach(
-        function(item) {
-
-          addMessageToScreen(
-            item.text,
-            item.role
-          );
-
+      for (const item of conversationHistory) {
+        if (
+          item &&
+          typeof item.text === "string" &&
+          (item.role === "user" || item.role === "assistant")
+        ) {
+          addMessageToScreen(item.text, item.role);
         }
-      );
+      }
 
-      chat.scrollTop =
-        chat.scrollHeight;
+      scrollToBottom();
     }
 
-
     function loadHistory() {
-
       try {
-
-        const saved =
-          localStorage.getItem(
-            STORAGE_KEY
-          );
+        const saved = localStorage.getItem(STORAGE_KEY);
 
         if (saved) {
-
-          const parsed =
-            JSON.parse(saved);
+          const parsed = JSON.parse(saved);
 
           if (Array.isArray(parsed)) {
-
-            conversationHistory =
-              parsed;
-
+            conversationHistory = parsed.filter(item =>
+              item &&
+              typeof item.text === "string" &&
+              (item.role === "user" || item.role === "assistant")
+            ).slice(-40);
           }
-
         }
-
       } catch (error) {
-
+        console.error("Could not load chat history:", error);
         conversationHistory = [];
-
       }
 
       renderHistory();
     }
 
-
     function showThinking() {
+      const row = document.createElement("div");
+      row.className = "message-row assistant-row";
 
-      const row =
-        document.createElement("div");
+      const container = document.createElement("div");
+      container.className = "message-container";
 
-      row.className =
-        "message-row assistant-row";
+      const message = document.createElement("div");
+      message.className = "message assistant-message";
 
-      const container =
-        document.createElement("div");
+      const thinking = document.createElement("span");
+      thinking.className = "thinking";
 
-      container.className =
-        "message-container";
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        thinking.appendChild(dot);
+      }
 
-      const message =
-        document.createElement("div");
-
-      message.className =
-        "message assistant-message";
-
-      message.innerHTML = `
-        <span class="thinking">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </span>
-      `;
-
+      message.appendChild(thinking);
       container.appendChild(message);
-
       row.appendChild(container);
-
       chat.appendChild(row);
-
-      chat.scrollTop =
-        chat.scrollHeight;
+      scrollToBottom();
 
       return row;
     }
 
-
     async function sendMessage() {
+      if (isSending) return;
 
-      if (isSending) {
-        return;
-      }
-
-      const message =
-        input.value.trim();
-
+      const message = input.value.trim();
       if (!message) {
-
         input.focus();
-
         return;
       }
 
       isSending = true;
+      sendButton.disabled = true;
 
-      sendButton.disabled =
-        true;
-
-
-      addMessage(
-        message,
-        "user"
-      );
-
+      // Save the user message, then send only earlier messages as history.
+      addMessage(message, "user");
+      const historyForRequest = conversationHistory
+        .slice(0, -1)
+        .slice(-12)
+        .map(item => ({
+          role: item.role,
+          text: item.text
+        }));
 
       input.value = "";
+      input.style.height = "auto";
 
-      input.style.height =
-        "auto";
+      const thinking = showThinking();
 
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message,
+            history: historyForRequest
+          })
+        });
 
-      const thinking =
-        showThinking();
+        const data = await response.json();
 
+        if (!response.ok) {
+          throw new Error(
+            data.error || "AI response పొందలేకపోయాం."
+          );
+        }
 
-      // Send the message to the Facts AI API.
+        if (
+          typeof data.reply !== "string" ||
+          !data.reply.trim()
+        ) {
+          throw new Error("AI నుంచి ఖాళీ సమాధానం వచ్చింది.");
+        }
 
-     
-try {
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-   body: JSON.stringify({
-  message: message,
-  history: []
-})
-  });
+        thinking.remove();
+        addMessage(data.reply.trim(), "assistant");
 
-  const data = await response.json();
+      } catch (error) {
+        thinking.remove();
 
-  thinking.remove();
+        // Do not save a network error as an AI answer in the conversation history.
+        addMessageToScreen(
+          "క్షమించండి, సమాధానం పొందడంలో సమస్య వచ్చింది: " +
+          (error.message || "దయచేసి మళ్లీ ప్రయత్నించండి."),
+          "assistant"
+        );
 
-  if (!response.ok) {
-    throw new Error(
-      data.error || "AI response పొందలేకపోయాం."
-    );
-  }
-
-  addMessage(data.reply, "assistant");
-
-} catch (error) {
-  thinking.remove();
-
-  addMessage(
-    "క్షమించండి, AI response పొందడంలో సమస్య వచ్చింది: " +
-      error.message,
-    "assistant"
-  );
-
-} finally {
-  isSending = false;
-  sendButton.disabled = false;
-  input.focus();
-}
-
-}
-
-function resizeInput() {
-
-      input.style.height =
-        "auto";
-
-      input.style.height =
-        Math.min(
-          input.scrollHeight,
-          130
-        ) + "px";
+      } finally {
+        isSending = false;
+        sendButton.disabled = false;
+        input.focus();
+      }
     }
 
+    sendButton.addEventListener("click", sendMessage);
 
-    sendButton.addEventListener(
-      "click",
-      sendMessage
-    );
-
-
-    input.addEventListener(
-      "keydown",
-      function(event) {
-
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey
-        ) {
-
-          event.preventDefault();
-
-          sendMessage();
-
-        }
-
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
       }
-    );
+    });
 
+    input.addEventListener("input", resizeInput);
 
-    input.addEventListener(
-      "input",
-      resizeInput
-    );
+    clearButton.addEventListener("click", () => {
+      if (isSending) return;
+      if (conversationHistory.length === 0) return;
 
-
-    clearButton.addEventListener(
-      "click",
-      function() {
-
-        if (
-          conversationHistory.length === 0
-        ) {
-          return;
-        }
-
-        if (
-          !confirm(
-            "ఈ conversation మొత్తాన్ని clear చేయాలా?"
-          )
-        ) {
-          return;
-        }
-
-        conversationHistory = [];
-
-        localStorage.removeItem(
-          STORAGE_KEY
-        );
-
-        renderHistory();
-
-        input.focus();
-
+      if (!confirm("ఈ conversation మొత్తాన్ని clear చేయాలా?")) {
+        return;
       }
-    );
 
+      conversationHistory = [];
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+      input.focus();
+    });
 
-    newChatButton.addEventListener(
-      "click",
-      function() {
+    newChatButton.addEventListener("click", () => {
+      if (isSending) return;
 
-        conversationHistory = [];
+      conversationHistory = [];
+      localStorage.removeItem(STORAGE_KEY);
+      input.value = "";
+      input.style.height = "auto";
+      renderHistory();
+      input.focus();
+    });
 
-        localStorage.removeItem(
-          STORAGE_KEY
-        );
+    async function checkApiStatus() {
+      try {
+        const response = await fetch("/api/health");
+        if (!response.ok) throw new Error("API unavailable");
 
-        input.value = "";
+        const data = await response.json();
 
-        input.style.height =
-          "auto";
-
-        renderHistory();
-
-        input.focus();
-
+        if (data.status === "ok") {
+          apiStatus.textContent = "● Online";
+          apiStatus.style.color = "#16803c";
+        } else {
+          throw new Error("API not ready");
+        }
+      } catch (error) {
+        apiStatus.textContent = "● Offline";
+        apiStatus.style.color = "#c62828";
       }
-    );
-
+    }
 
     loadHistory();
-
     input.focus();
-const apiStatus = document.getElementById("apiStatus");
-
-async function checkApiStatus() {
-  try {
-    const response = await fetch("/api/health");
-
-    if (!response.ok) {
-      throw new Error("API unavailable");
-    }
-
-    const data = await response.json();
-
-    if (data.status === "ok") {
-      apiStatus.textContent = "● Online";
-      apiStatus.style.color = "#16803c";
-    } else {
-      throw new Error("API not ready");
-    }
-  } catch (error) {
-    apiStatus.textContent = "● Offline";
-    apiStatus.style.color = "#c62828";
-  }
-}
-
-checkApiStatus();
-setInterval(checkApiStatus, 30000);
+    checkApiStatus();
+    setInterval(checkApiStatus, 30000);
   </script>
-
 </body>
 </html>
