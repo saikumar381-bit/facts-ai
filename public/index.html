@@ -1,44 +1,589 @@
-function addCopyButton(messageElement, text) {
-  const button = document.createElement("button");
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1120">
+  <title>Facts AI - తెలుగు AI సహాయకుడు</title>
 
-  button.type = "button";
-  button.textContent = "📋 Copy";
-  button.style.cssText = `
-    margin-top: 12px;
-    padding: 9px 14px;
-    border: 1px solid #334155;
-    border-radius: 9px;
-    background: #1e293b;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-  `;
-
-  button.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      button.textContent = "✅ Copied!";
-    } catch (error) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.left = "-9999px";
-
-      document.body.appendChild(textarea);
-      textarea.select();
-
-      const copied = document.execCommand("copy");
-      textarea.remove();
-
-      button.textContent = copied
-        ? "✅ Copied!"
-        : "❌ Copy failed";
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    setTimeout(() => {
-      button.textContent = "📋 Copy";
-    }, 2000);
-  });
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans Telugu", sans-serif;
+      background: #0b1120;
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
 
-  messageElement.appendChild(button);
-}
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #111c30;
+      border-bottom: 1px solid #263449;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: #2563eb;
+      font-size: 27px;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      margin: 0 0 5px;
+      font-size: 21px;
+    }
+
+    header p {
+      margin: 0;
+      color: #a8b6cb;
+      font-size: 12px;
+    }
+
+    #status {
+      margin-left: auto;
+      color: #86efac;
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 18px 14px 20px;
+    }
+
+    #welcome {
+      text-align: center;
+      padding: 42px 8px 28px;
+    }
+
+    #welcome h2 {
+      font-size: 28px;
+      margin: 0 0 18px;
+    }
+
+    #welcome p {
+      color: #a8b6cb;
+      line-height: 1.9;
+      font-size: 16px;
+    }
+
+    #suggestions {
+      display: grid;
+      gap: 12px;
+      margin: 16px 0 28px;
+    }
+
+    .suggestion {
+      text-align: left;
+      padding: 20px 18px;
+      border: 1px solid #263449;
+      border-radius: 20px;
+      background: #111c30;
+      color: #e2e8f0;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .suggestion:hover {
+      border-color: #3b82f6;
+    }
+
+    #chat {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding-bottom: 18px;
+    }
+
+    .message {
+      max-width: 100%;
+      padding: 17px;
+      border-radius: 22px;
+      line-height: 1.9;
+      overflow-wrap: anywhere;
+    }
+
+    .user {
+      align-self: flex-end;
+      max-width: 92%;
+      background: #214fd2;
+    }
+
+    .assistant {
+      align-self: stretch;
+      background: #111c30;
+      border: 1px solid #263449;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 10px;
+      color: #93c5fd;
+      font-size: 13px;
+    }
+
+    .message-text {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-button {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 9px 14px;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #f1f5f9;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .copy-button:active {
+      background: #2563eb;
+    }
+
+    .composer {
+      position: sticky;
+      bottom: 0;
+      padding: 12px 0 8px;
+      background: #0b1120;
+      z-index: 4;
+    }
+
+    .input-area {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #334155;
+      border-radius: 24px;
+      background: #111c30;
+    }
+
+    textarea {
+      flex: 1;
+      min-width: 0;
+      min-height: 58px;
+      max-height: 160px;
+      padding: 12px 8px;
+      resize: vertical;
+      outline: none;
+      border: 0;
+      background: transparent;
+      color: white;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    #send {
+      min-height: 48px;
+      padding: 12px 17px;
+      border: 0;
+      border-radius: 15px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    #send:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 3px;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    #clear {
+      padding: 9px 12px;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      background: transparent;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+
+    footer {
+      padding: 20px 10px 30px;
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 520px) {
+      header h1 {
+        font-size: 19px;
+      }
+
+      #welcome h2 {
+        font-size: 25px;
+      }
+
+      .suggestion {
+        padding: 19px 16px;
+      }
+
+      .message {
+        padding: 15px;
+      }
+
+      #send {
+        padding: 12px;
+      }
+
+      .toolbar {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">✦</div>
+    <div>
+      <h1>Facts AI</h1>
+      <p>తెలుగు పరిశోధన మరియు AI సహాయకుడు</p>
+    </div>
+    <div id="status">Ready</div>
+  </header>
+
+  <main>
+    <section id="welcome">
+      <h2>నమస్కారం! 👋</h2>
+      <p>
+        మీ ప్రశ్న అడగండి.<br>
+        వాస్తవాలు, తాజా సమాచారం, పరిశోధన మరియు
+        వీడియోల తయారీలో సహాయం పొందండి.
+      </p>
+    </section>
+
+    <section id="suggestions">
+      <button class="suggestion"
+        data-prompt="ఈరోజు భారతదేశంలో ముఖ్యమైన వార్తలు చెప్పు. మూలాలు, ప్రచురణ తేదీలు అందుబాటులో ఉంటే ఇవ్వు.">
+        📰 తాజా వార్తలు
+      </button>
+
+      <button class="suggestion"
+        data-prompt="సూర్యుడి గురించి ముఖ్యమైన శాస్త్రీయ వాస్తవాలు వివరించు.">
+        ☀️ సైన్స్ విషయాలు
+      </button>
+
+      <button class="suggestion"
+        data-prompt="ఒక ఆసక్తికరమైన తెలుగు YouTube వీడియో స్క్రిప్ట్ తయారు చేయి.">
+        🎬 వీడియో స్క్రిప్ట్
+      </button>
+
+      <button class="suggestion"
+        data-prompt="ఒక సమాచారాన్ని ఎలా fact-check చేయాలో వివరించు.">
+        🔎 Fact checking
+      </button>
+    </section>
+
+    <section id="chat" aria-live="polite"></section>
+
+    <section class="composer">
+      <div class="input-area">
+        <textarea
+          id="message"
+          placeholder="మీ ప్రశ్నను తెలుగులో లేదా ఇంగ్లీషులో టైప్ చేయండి..."
+          aria-label="మీ ప్రశ్న"
+        ></textarea>
+
+        <button id="send" type="button">పంపు ➤</button>
+      </div>
+
+      <div class="toolbar">
+        <span>సమాచారాన్ని ముఖ్యమైన సందర్భాల్లో ధృవీకరించండి.</span>
+        <button id="clear" type="button">చాట్ తొలగించు</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>Facts AI · తెలుగు AI సహాయకుడు</footer>
+
+  <script>
+    const API_URL = "/api/chat";
+    const STORAGE_KEY = "facts_ai_ui_history_v1";
+
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("message");
+    const sendButton = document.getElementById("send");
+    const clearButton = document.getElementById("clear");
+    const statusLabel = document.getElementById("status");
+    const welcome = document.getElementById("welcome");
+    const suggestions = document.getElementById("suggestions");
+
+    let conversationHistory = [];
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+
+      if (Array.isArray(parsed)) {
+        conversationHistory = parsed
+          .filter(item =>
+            item &&
+            typeof item.text === "string" &&
+            ["user", "assistant"].includes(item.role)
+          )
+          .slice(-40);
+      }
+    } catch (error) {
+      console.error("History load error:", error);
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(conversationHistory.slice(-40))
+        );
+      } catch (error) {
+        console.error("History save error:", error);
+      }
+    }
+
+    async function copyText(text, button) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.left = "-9999px";
+          textarea.style.top = "0";
+
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+
+          const success = document.execCommand("copy");
+          textarea.remove();
+
+          if (!success) {
+            throw new Error("Copy command failed");
+          }
+        }
+
+        button.textContent = "✅ Copied!";
+      } catch (error) {
+        button.textContent = "Copy కాలేదు";
+        console.error("Copy error:", error);
+      }
+
+      setTimeout(() => {
+        button.textContent = "📋 Copy";
+      }, 2000);
+    }
+
+    function addMessage(role, text) {
+      const message = document.createElement("article");
+      message.className = "message " + role;
+
+      const label = document.createElement("span");
+      label.className = "label";
+      label.textContent = role === "user" ? "మీరు" : "Facts AI";
+
+      const content = document.createElement("div");
+      content.className = "message-text";
+      content.textContent = text;
+
+      message.appendChild(label);
+      message.appendChild(content);
+
+      if (role === "assistant") {
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "copy-button";
+        copyButton.textContent = "📋 Copy";
+
+        copyButton.addEventListener("click", () => {
+          copyText(text, copyButton);
+        });
+
+        message.appendChild(copyButton);
+      }
+
+      chat.appendChild(message);
+      return message;
+    }
+
+    function renderHistory() {
+      chat.replaceChildren();
+
+      for (const item of conversationHistory) {
+        addMessage(item.role, item.text);
+      }
+
+      const hasMessages = conversationHistory.length > 0;
+      welcome.hidden = hasMessages;
+      suggestions.hidden = hasMessages;
+    }
+
+    async function sendMessage(prefill) {
+      const message = (
+        typeof prefill === "string" ? prefill : input.value
+      ).trim();
+
+      if (!message || sendButton.disabled) {
+        return;
+      }
+
+      const historyForRequest = conversationHistory
+        .slice(-12)
+        .map(item => ({
+          role: item.role,
+          text: item.text
+        }));
+
+      conversationHistory.push({
+        role: "user",
+        text: message
+      });
+
+      conversationHistory = conversationHistory.slice(-40);
+      saveHistory();
+      renderHistory();
+
+      input.value = "";
+      sendButton.disabled = true;
+      statusLabel.textContent = "Thinking...";
+
+      const pending = addMessage(
+        "assistant",
+        "సమాధానం తయారు చేస్తున్నాను..."
+      );
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message,
+            history: historyForRequest
+          })
+        });
+
+        let data;
+
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("సర్వర్ నుంచి సరైన సమాధానం రాలేదు.");
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error || "HTTP error: " + response.status
+          );
+        }
+
+        if (
+          typeof data?.reply !== "string" ||
+          !data.reply.trim()
+        ) {
+          throw new Error("AI సమాధానం ఖాళీగా ఉంది.");
+        }
+
+        pending.remove();
+
+        conversationHistory.push({
+          role: "assistant",
+          text: data.reply.trim()
+        });
+
+        conversationHistory = conversationHistory.slice(-40);
+        saveHistory();
+        renderHistory();
+
+        statusLabel.textContent =
+          data?.research?.searchSucceeded === true
+            ? "Search used"
+            : "Ready";
+
+      } catch (error) {
+        pending.remove();
+
+        const errorText =
+          "సమాధానం పొందలేకపోయాం.\n" +
+          (error?.message || "తెలియని సమస్య") +
+          "\nదయచేసి మళ్లీ ప్రయత్నించండి.";
+
+        conversationHistory.push({
+          role: "assistant",
+          text: errorText
+        });
+
+        conversationHistory = conversationHistory.slice(-40);
+        saveHistory();
+        renderHistory();
+        statusLabel.textContent = "Error";
+
+      } finally {
+        sendButton.disabled = false;
+      }
+    }
+
+    sendButton.addEventListener("click", () => {
+      sendMessage();
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.querySelectorAll(".suggestion").forEach(button => {
+      button.addEventListener("click", () => {
+        sendMessage(button.dataset.prompt || "");
+      });
+    });
+
+    clearButton.addEventListener("click", () => {
+      if (!confirm("చాట్ చరిత్రను తొలగించాలా?")) {
+        return;
+      }
+
+      conversationHistory = [];
+      saveHistory();
+      renderHistory();
+      statusLabel.textContent = "Ready";
+    });
+
+    renderHistory();
+  </script>
+</body>
+  </html>
