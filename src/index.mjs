@@ -1,48 +1,43 @@
-
 const SYSTEM_INSTRUCTION = `
 You are Facts AI, a Telugu-first research and content assistant.
 
-ACCURACY:
-- Answer in natural, simple Telugu unless the user requests another language.
+LANGUAGE:
+- Prefer simple, natural Telugu.
 - Answer every question in the user's message.
-- Never invent facts, dates, quotes, links, sources, or research.
-- Distinguish established facts, reported claims, and uncertainty.
-- Use the supplied web search results as evidence, not as unquestionable truth.
-- Do not claim you opened or verified a webpage unless you actually did.
-- If evidence is insufficient, clearly say so.
-- Do not treat a search result's last-modified date as its publication date.
-- Never present an undated result as a confirmed current news story.
+- Explain technical topics clearly.
+
+ACCURACY:
+- Never invent facts, numbers, dates, sources, or URLs.
+- Do not claim research was completed unless it actually happened.
+- Distinguish facts, reported claims, and uncertainty.
+- If evidence is insufficient, say so.
+- Accuracy is more important than speed.
 
 CURRENT NEWS:
-- For requests about today's, latest, or recent news, use the supplied search results.
-- State the publication date only when the source explicitly provides it.
-- If only a last-modified date is available, label it as such.
-- Prefer recent, relevant reporting from reliable outlets and official sources.
-- Do not invent event dates or publication dates.
-- Exclude clearly old stories from a today's-news roundup.
-- If a result has no reliable date, label its date as unavailable and do not assert it is today's news.
-- If search failed or returned no useful results, say that current news could not be verified.
-- Do not turn an old story into breaking news by rewriting its headline.
-- Group multiple reports about the same underlying event instead of repeating them.
-- Include source URLs provided in the search results.
-- Search snippets alone do not prove that every claim in an article is true.
+- Use supplied web search results for current news.
+- Never present old news as today's news.
+- Do not invent publication dates.
+- A last-modified date is not necessarily a publication date.
+- Include source links only when supplied by search results.
+- Do not claim an article was opened or fully verified unless it was.
+- If search fails, clearly say current news could not be verified.
+- Group duplicate reports about the same event.
+- Do not invent breaking news.
 
 FACT CHECKING:
-- Use TRUE, FALSE, MISLEADING, or UNCERTAIN where appropriate.
-- Explain evidence and important context.
-- Never guess the cause of accidents or disasters.
+- Use TRUE, FALSE, MISLEADING, or UNCERTAIN when appropriate.
+- Explain the evidence and relevant context.
 
 VIDEO CONTENT:
-- Create accurate Telugu scripts with a hook, introduction, main content, and ending when useful.
-- Suggest scene-by-scene visuals when requested.
-- Do not invent sources, eyewitness accounts, or quotations.
-- Flag important claims that need more verification before publication.
-- Respect copyright and licensing.
+- Create engaging, accurate Telugu scripts.
+- Use Hook, Introduction, Main Content, and Ending when appropriate.
+- Do not invent sources or quotations.
+- Flag important claims needing further verification.
 
 CONVERSATION:
-- Use relevant conversation history supplied with the request.
+- Use relevant conversation history.
+- Answer follow-up questions in context.
 - Avoid unnecessary repetition.
-- Never imply web research occurred if it did not.
 `;
 
 const MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
@@ -57,68 +52,10 @@ function getIndiaDate() {
 }
 
 function isNewsRequest(message) {
-  return /\b(news|headlines|breaking news|latest news|current affairs|today'?s news|today news|recent news)\b|వార్తలు|వార్త|నేటి వార్తలు|ఈరోజు వార్తలు|తాజా వార్తలు|ముఖ్యమైన వార్తలు|బ్రేకింగ్ న్యూస్|ప్రస్తుత వార్తలు/i.test(
-    message
+  return (
+    /\b(news|headlines|breaking news|latest news|current affairs|today'?s news|today news|recent news)\b/i.test(message) ||
+    /వార్తలు|వార్త|నేటి వార్తలు|ఈరోజు వార్తలు|తాజా వార్తలు|ముఖ్యమైన వార్తలు|బ్రేకింగ్ న్యూస్|ప్రస్తుత వార్తలు/i.test(message)
   );
-}
-
-function getResultDate(item) {
-  // These fields may vary by provider. Never invent a date.
-  const candidates = [
-    item?.publishedDate,
-    item?.published_date,
-    item?.publicationDate,
-    item?.publication_date,
-    item?.datePublished,
-    item?.date_published,
-    item?.lastModifiedDate,
-    item?.last_modified_date,
-    item?.lastModified,
-    item?.last_modified
-  ];
-
-  for (const value of candidates) {
-    if (typeof value !== "string") continue;
-
-    const match = value.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
-    if (!match) continue;
-
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-
-    const date = new Date(Date.UTC(year, month - 1, day));
-
-    if (
-      date.getUTCFullYear() === year &&
-      date.getUTCMonth() === month - 1 &&
-      date.getUTCDate() === day
-    ) {
-      return {
-        date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-        type: [
-          item?.publishedDate,
-          item?.published_date,
-          item?.publicationDate,
-          item?.publication_date,
-          item?.datePublished,
-          item?.date_published
-        ].includes(value)
-          ? "publication date reported by search provider"
-          : "last-modified date; not necessarily publication date"
-      };
-    }
-  }
-
-  return null;
-}
-
-function normalizeTitle(title) {
-  return String(title || "")
-    .toLowerCase()
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
 }
 
 function normalizeUrl(rawUrl) {
@@ -134,9 +71,7 @@ function normalizeUrl(rawUrl) {
     for (const key of [...url.searchParams.keys()]) {
       if (
         /^utm_/i.test(key) ||
-        ["fbclid", "gclid", "ref", "source"].includes(
-          key.toLowerCase()
-        )
+        ["fbclid", "gclid"].includes(key.toLowerCase())
       ) {
         url.searchParams.delete(key);
       }
@@ -148,106 +83,187 @@ function normalizeUrl(rawUrl) {
   }
 }
 
-function prepareSearchResults(data, newsMode) {
-  const items = Array.isArray(data?.items) ? data.items : [];
+function normalizeTitle(title) {
+  return String(title || "")
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+function getDateInfo(item) {
+  const publicationFields = [
+    "publishedDate",
+    "published_date",
+    "publicationDate",
+    "publication_date",
+    "datePublished",
+    "date_published"
+  ];
+
+  for (const field of publicationFields) {
+    const value = item?.[field];
+
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const match = value.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
+
+    if (!match) {
+      continue;
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day
+    ) {
+      return {
+        date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+        type: "Publication date"
+      };
+    }
+  }
+
+  const modifiedFields = [
+    "lastModifiedDate",
+    "last_modified_date",
+    "lastModified",
+    "last_modified"
+  ];
+
+  for (const field of modifiedFields) {
+    const value = item?.[field];
+
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const match = value.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
+
+    if (match) {
+      return {
+        date: `${match[1]}-${String(match[2]).padStart(2, "0")}-${String(match[3]).padStart(2, "0")}`,
+        type: "Last-modified date, not confirmed publication date"
+      };
+    }
+  }
+
+  return null;
+}
+
+function prepareSearchResults(data) {
+  const items = Array.isArray(data?.items)
+    ? data.items
+    : Array.isArray(data?.results)
+      ? data.results
+      : [];
+
   const seenUrls = new Set();
   const seenTitles = new Set();
   const results = [];
-  const today = getIndiaDate();
 
   for (const item of items) {
-    const url = normalizeUrl(item?.url);
     const title = String(item?.title || "").trim();
-    const description = String(item?.description || "").trim();
+    const rawUrl = item?.url || item?.link;
+    const url = normalizeUrl(rawUrl);
+    const description = String(
+      item?.description || item?.snippet || ""
+    ).trim();
 
-    if (!url || !title) continue;
+    if (!title || !url) {
+      continue;
+    }
 
     const normalizedTitle = normalizeTitle(title);
 
-    // Remove exact duplicate URLs and identical normalized headlines.
-    if (seenUrls.has(url) || seenTitles.has(normalizedTitle)) {
+    if (
+      seenUrls.has(url) ||
+      (normalizedTitle && seenTitles.has(normalizedTitle))
+    ) {
       continue;
     }
 
     seenUrls.add(url);
-    seenTitles.add(normalizedTitle);
 
-    const dateInfo = getResultDate(item);
-
-    let freshness = "Date unavailable; current status not confirmed.";
-
-    if (dateInfo) {
-      freshness = `${dateInfo.type}: ${dateInfo.date}.`;
-
-      if (newsMode && dateInfo.type === "publication date reported by search provider") {
-        const ageMs = Date.parse(`${today}T00:00:00Z`) -
-          Date.parse(`${dateInfo.date}T00:00:00Z`);
-
-        const ageDays = Math.floor(ageMs / 86400000);
-
-        if (ageDays > 7) {
-          freshness += " Older than 7 days; do not present as today's news.";
-        } else if (ageDays < 0) {
-          freshness += " Date is in the future; treat as unverified.";
-        } else {
-          freshness += " Within the last 7 calendar days; still verify relevance.";
-        }
-      }
+    if (normalizedTitle) {
+      seenTitles.add(normalizedTitle);
     }
+
+    const dateInfo = getDateInfo(item);
 
     results.push({
       title,
       url,
       description: description.slice(0, 1200),
       date: dateInfo?.date || null,
-      dateType: dateInfo?.type || null,
-      freshness
+      dateType: dateInfo?.type || "Date unavailable"
     });
   }
 
-  return results.slice(0, 6);
+  return results.slice(0, 8);
 }
 
-function buildResearchContext(results, newsMode, searchWorked) {
-  if (!searchWorked) {
+function buildResearchContext(results, searchStatus, newsMode) {
+  if (searchStatus === "failed") {
     return `
-WEB RESEARCH STATUS: UNAVAILABLE
-The web search request failed. Do not claim you searched the web.
-For current news, clearly tell the user that current information could not be verified.
-Do not fabricate news headlines, dates, or URLs.
+WEB SEARCH STATUS: FAILED
+
+The web search request failed.
+Do not invent news, results, dates, or source links.
+
+${newsMode
+  ? "Tell the user in Telugu that current news could not be verified because web search failed."
+  : "Answer using available knowledge, clearly explaining when current information cannot be verified."}
 `;
   }
 
   if (!results.length) {
     return `
-WEB RESEARCH STATUS: Search returned no usable results.
-Do not invent sources or headlines.
-${newsMode ? "Explain that no usable current news results were found." : ""}
+WEB SEARCH STATUS: NO USABLE RESULTS
+
+No usable search results were returned.
+Do not invent search results or URLs.
+
+${newsMode
+  ? "Tell the user in Telugu that no usable current news results were found."
+  : "Answer cautiously and explain any limitations."}
 `;
   }
 
   return `
-WEB RESEARCH STATUS: Search results received.
-Current India date: ${getIndiaDate()}
-Request is about current news: ${newsMode ? "YES" : "NO"}
+WEB SEARCH STATUS: SUCCESS
+India date: ${getIndiaDate()}
+Current news request: ${newsMode ? "YES" : "NO"}
 
-Important:
-- Results below are search results, not independently verified articles.
-- Only use the supplied URLs as source links.
-- Never invent a publication date.
-- A last-modified date is not necessarily the publication date.
-- A date-unavailable result must not be called today's news.
-- For current news, do not describe clearly old results as new.
-- Merge reports about the same event when their underlying story is the same.
-- If the evidence does not support a claim, say it remains unverified.
+Rules:
+- These are search results, not independently verified articles.
+- Use only the source URLs supplied below.
+- Never invent publication dates.
+- If a date is unavailable, say so.
+- Do not present old or undated results as confirmed today's news.
+- A last-modified date is not necessarily a publication date.
+- Avoid repeating identical headlines.
+- Multiple reports about one event may still describe the same story.
+- Search snippets alone do not prove every claim is true.
+- Answer in simple Telugu.
 
 SEARCH RESULTS:
+
 ${results.map((item, index) => `
-[${index + 1}]
+Result ${index + 1}
 Title: ${item.title}
 URL: ${item.url}
-Date information: ${item.freshness}
-Description: ${item.description || "No description supplied."}
+Date: ${item.date || "Unavailable"}
+Date type: ${item.dateType}
+Description: ${item.description || "No description provided"}
 `).join("\n")}
 `;
 }
@@ -256,13 +272,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // Health check
     if (url.pathname === "/api/health") {
       return Response.json({
         status: "ok",
-        service: "Facts AI"
+        service: "Facts AI",
+        date: getIndiaDate()
       });
     }
 
+    // Chat API
     if (url.pathname === "/api/chat") {
       if (request.method !== "POST") {
         return Response.json(
@@ -279,7 +298,10 @@ export default {
           ? body.history
           : [];
 
-        if (typeof message !== "string" || !message.trim()) {
+        if (
+          typeof message !== "string" ||
+          !message.trim()
+        ) {
           return Response.json(
             { error: "Message is required" },
             { status: 400 }
@@ -288,7 +310,9 @@ export default {
 
         if (!env.AI) {
           return Response.json(
-            { error: "Cloudflare AI binding 'AI' is not configured." },
+            {
+              error: "Cloudflare AI binding 'AI' is not configured."
+            },
             { status: 500 }
           );
         }
@@ -296,12 +320,12 @@ export default {
         const cleanMessage = message.trim();
         const newsMode = isNewsRequest(cleanMessage);
 
-        let searchWorked = false;
-        let researchContext = "";
+        let searchStatus = "failed";
+        let searchResults = [];
 
         try {
           const searchQuery = newsMode
-            ? `${cleanMessage} latest news India Telangana Andhra Pradesh publication date ${getIndiaDate()}`
+            ? `${cleanMessage} latest news India publication date ${getIndiaDate()}`
             : cleanMessage;
 
           const searchResponse = await env.AI.websearch({
@@ -311,39 +335,33 @@ export default {
             limit: 10
           });
 
-          if (!searchResponse.ok) {
+          if (!searchResponse || !searchResponse.ok) {
             throw new Error(
-              `Web Search returned HTTP ${searchResponse.status}`
+              `Web Search request failed: HTTP ${searchResponse?.status ?? "unknown"}`
             );
           }
 
           const searchData = await searchResponse.json();
 
-          if (!Array.isArray(searchData?.items)) {
-            throw new Error("Unexpected Web Search response format");
-          }
+          searchResults = prepareSearchResults(searchData);
+          searchStatus = "success";
 
-          searchWorked = true;
-
-          const preparedResults = prepareSearchResults(
-            searchData,
+          console.log("Web Search completed", {
+            resultCount: searchResults.length,
             newsMode
-          );
-
-          researchContext = buildResearchContext(
-            preparedResults,
-            newsMode,
-            true
-          );
-        } catch (searchError) {
-          console.error("Web Search error:", searchError);
-
-          researchContext = buildResearchContext(
-            [],
-            newsMode,
-            false
+          });
+        } catch (error) {
+          console.error(
+            "Web Search error:",
+            error?.message || String(error)
           );
         }
+
+        const researchContext = buildResearchContext(
+          searchResults,
+          searchStatus,
+          newsMode
+        );
 
         const messages = [
           {
@@ -363,7 +381,9 @@ export default {
             item.text.trim()
           ) {
             messages.push({
-              role: item.role === "assistant" ? "assistant" : "user",
+              role: item.role === "assistant"
+                ? "assistant"
+                : "user",
               content: item.text.trim().slice(0, 6000)
             });
           }
@@ -382,10 +402,13 @@ export default {
 
         const reply = result?.response;
 
-        if (typeof reply !== "string" || !reply.trim()) {
+        if (
+          typeof reply !== "string" ||
+          !reply.trim()
+        ) {
           return Response.json(
             {
-              error: "AI నుంచి పూర్తి సమాధానం అందలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."
+              error: "AI నుంచి పూర్తి సమాధానం అందలేదు. మళ్లీ ప్రయత్నించండి."
             },
             { status: 502 }
           );
@@ -395,12 +418,16 @@ export default {
           reply: reply.trim(),
           research: {
             attempted: true,
-            searchSucceeded: searchWorked,
+            searchSucceeded: searchStatus === "success",
+            resultCount: searchResults.length,
             currentNewsRequest: newsMode
           }
         });
       } catch (error) {
-        console.error("Worker error:", error);
+        console.error(
+          "Worker error:",
+          error?.stack || error?.message || String(error)
+        );
 
         return Response.json(
           {
@@ -411,6 +438,22 @@ export default {
       }
     }
 
-    return env.ASSETS.fetch(request);
+    // Serve website files safely.
+    if (
+      env.ASSETS &&
+      typeof env.ASSETS.fetch === "function"
+    ) {
+      return env.ASSETS.fetch(request);
+    }
+
+    return new Response(
+      "Facts AI: Static asset binding ASSETS is unavailable in this environment.",
+      {
+        status: 404,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8"
+        }
+      }
+    );
   }
 };
